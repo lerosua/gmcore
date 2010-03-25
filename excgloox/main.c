@@ -21,6 +21,7 @@
 void recv_msg(const char* id,const char* msg)
 {
 	printf("%s say : %s \n",id,msg);
+	qx_send_message(id, "fuck off",0);
 
 }
 void on_connect()

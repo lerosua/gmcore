@@ -104,15 +104,17 @@ class Excgloox:public RosterListener, MessageSessionHandler, ConnectionListener
 
 	void start(unsigned int blocked) {
 
-		m_client->connect();
-		/*
+		if(blocked)
+			m_client->connect();
+		else
+		{
 		if (m_client->connect(false)) {
 			ConnectionError ce = ConnNoError;
 			while (ConnNoError == ce) {
 				ce = m_client->recv();
 			}
 		}
-		*/
+		}
 
 	}
 	    /** about roster manager*/
@@ -214,6 +216,24 @@ class Excgloox:public RosterListener, MessageSessionHandler, ConnectionListener
 		handle_non_roster_presence(presence.from().full().c_str());
 	}
 
+	void subscribe(const std::string& jid_,const std::string& alias_,const std::string& group_){
+		StringList groups;
+		groups.push_back(group_);
+		JID jid(jid_);
+		m_client->rosterManager()->subscribe(jid,alias_,groups,"");
+
+	}
+	void unsubscribe(const std::string& jid_)
+	{
+		JID jid(jid_);
+		m_client->rosterManager()->unsubscribe(jid);
+	}
+	void sendMsg(const std::string& jid_,const std::string& msg_)
+	{
+		JID to(jid_);
+		Message msg(gloox::Message::Chat,to,msg_);
+		m_client->send(msg);
+	}
 
     /** register the func */
 	void register_message_handler(void (*func_)
@@ -406,12 +426,24 @@ BOOL qx_logout(const char *user_id)
 
 }
 
-BOOL qx_send_message(unsigned long uid, const char *msg, BOOL block)
+BOOL qx_send_message(const char* uid, const char *msg, BOOL block)
 {
+	qx_gloox->sendMsg(uid,msg);
 
 }
 
 BOOL qx_change_state_buddy(unsigned long uid, long state)
 {
+
+}
+void qx_add_buddy(const char* uid,const char* alias,const char* group)
+{
+	qx_gloox->subscribe(uid,alias,group);
+
+}
+
+void qx_rm_buddy(const char* uid)
+{
+	qx_gloox->unsubscribe(uid);
 
 }

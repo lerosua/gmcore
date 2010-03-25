@@ -38,12 +38,8 @@ extern "C" {
 	void qx_run(BOOL block_);
 	BOOL qx_logout(const char *user_id);
 //发送信息
-	BOOL qx_send_message(unsigned long uid, const char *msg,
+	BOOL qx_send_message(const char* uid, const char *msg,
 			     BOOL block);
-
-//好友在线状态改变
-	BOOL qx_change_state_buddy(unsigned long uid, long state);
-
 
 
 	void qx_connect();
@@ -61,12 +57,15 @@ extern "C" {
 	void qx_register_handle_item_updated(QFUNC1 func_);
 	void qx_register_handle_roster(QFUNC5 func_);
 	void qx_register_handle_roster_error(QFUNC1 func_);
+	//好友在线状态改变
 	void qx_register_handle_roster_presence(QFUNC4 func_);
 	void qx_register_handle_self_presence(QFUNC4 func_);
 	void qx_register_handle_subscription_request(QFUNC2 func_);
 	void qx_register_handle_unsubscription_request(QFUNC2 func_);
 	void qx_register_handle_non_roster_presence(QFUNC1 func_);
 
+	void qx_rm_buddy(const char* uid);
+	void qx_add_buddy(const char* uid,const char* alias,const char* group);
 
 
 #ifdef __cplusplus
