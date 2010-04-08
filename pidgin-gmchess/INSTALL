@@ -1,0 +1,23 @@
+- Installing on Linux -
+
+Simply run, as root:
+ make all install
+
+Or, if you do not have root access:
+ make all install-user
+
+
+- Installing on Windows -
+
+Use the binary!
+
+If you really want to compile this,
+I recommend first making sure that you
+can compile pidgin itself from source.
+
+Our Makefile.mingw file is yet incomplete.
+For now, copy fonomobutton.c into 
+pidgin-X.X.X/pidgin/plugins/,
+edit Makefile.mingw... run
+ make -f Makefile.mingw 
+
