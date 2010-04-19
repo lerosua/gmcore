@@ -14,23 +14,48 @@
 #include "gtkconvwin.h"
 #include "gtkimhtml.h"
 #include "account.h"
+#include "request.h"
 #include "conversation.h"
 
 /** Plugin id : type-author-name (to guarantee uniqueness) */
 #define GMCHESS_NETWORK_PLUGIN_ID "gmchess-network-game"
 
+static void ok_poune(const char* m)
+{
+	//ok，start the gmchess game
+
+}
+static void no_poune(const char* m)
+{
+	//no, do nothing
+
+}
 static gboolean
 writing_im_msg_cb(PurpleAccount *account, const char *who, char **buffer,
 				PurpleConversation *conv, PurpleMessageFlags flags, void *data)
 {
+	if ( strstr(*buffer, "[{game:gmchess,") != NULL) {
+#if 0
 		guint32 randnum;
 		gchar* out;
-	if ( strstr(*buffer, "[{game:gmchess,") != NULL) {
 		purple_debug_misc("gmchess plugin", "chinese chess game.\n");
 		randnum=g_random_int();
 		out = g_strdup_printf("i receive gmchess asking session id %X",randnum);
 		purple_conv_im_send_with_flags(PURPLE_CONV_IM(conv), out, flags);
 		g_free(out);
+#endif
+		if(strstr(*buffer,"action:ask,status:start")!=NULL){
+			char* ask;
+			ask= g_strdup_printf(" %s is asking you play gmchess together!",who);
+			purple_request_action("gmchess ask","gmchess ask",ask,
+					"you can start/no play this game",
+					0,
+					account,who,conv,
+					"test",2,
+					"Yes",ok_poune,
+					"No",no_poune);
+			g_free(ask);
+		}
 		return FALSE;
 	}
 	else {
@@ -43,7 +68,9 @@ gmchess_button_cb(GtkButton* button, PidginConversation* gtkconv)
 {
 
 	gchar* joinstr;
-	joinstr = g_strdup_printf("can you play gmchess with me?");
+	guint32 session_id_;
+	session_id_= g_random_int();
+	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:ask,status:start}]",session_id_);
     gtk_imhtml_append_text(GTK_IMHTML(gtkconv->entry), joinstr, FALSE);
     g_signal_emit_by_name(gtkconv->entry, "message_send");
 	g_free(joinstr);
