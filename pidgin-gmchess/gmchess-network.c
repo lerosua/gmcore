@@ -16,17 +16,91 @@
 #include "account.h"
 #include "request.h"
 #include "conversation.h"
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
 
 /** Plugin id : type-author-name (to guarantee uniqueness) */
 #define GMCHESS_NETWORK_PLUGIN_ID "gmchess-network-game"
+#define GMPORT  20126
+
+typedef struct gmstatus_{
+	guint32 id;
+	int role;
+	int number;
+	PidginConversation * conv;
+}gmstatus;
 
 static void send_gmchess(const char *mv);
+GIOChannel *io_channel;
+int source_id;
+int fd;
+static gmstatus _global_status;
 
+
+static void init_gm_status()
+{
+	_global_status.id=0;
+	_global_status.role=0;
+	_global_status.number=0;
+	_global_status.conv=NULL;
+
+}
+static int create_socket()
+{
+	int sockfd;
+	struct sockaddr_in srvaddr;
+
+	if(-1 == (sockfd=socket(AF_INET,SOCK_STREAM,0)))
+		return -1;
+	bzero(&srvaddr,sizeof(srvaddr));
+	srvaddr.sin_family=AF_INET;
+	srvaddr.sin_port=htons(GMPORT);
+	srvaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+
+	int on = 1;
+	if( -1 == (setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) )))
+		return -1;
+	if(bind(sockfd,(struct sockaddr*)&srvaddr,
+			sizeof(struct sockaddr))==-1){
+		return -1;
+
+	}
+	if(-1 == listen(sockfd,128))
+		return -1;
+	return sockfd;
+}
+
+gboolean read_socket(GIOChannel* source, GIOCondition condition,gpointer data)
+{
+	int fd_cli;
+	fd_cli=-1;
+	if(-1 == (fd_cli = accept(fd,NULL,0)));
+	char buf[1024];
+	size_t len=0;
+	len = read(fd_cli,&buf[0],1023);
+	buf[len]=0;
+	if(len>0){
+		printf("gmchess send %s\n",buf);
+	}
+	return TRUE;
+
+
+}
 
 static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
 	send_gmchess("network-game");
+	//then send reply to parter
+	gchar* joinstr;
+	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL}]",
+			_global_status.id,_global_status.role,_global_status.number);
+	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
+	g_signal_emit_by_name(_global_status.conv->entry,"message_send");
+	g_free(joinstr);
 
 }
 
@@ -34,14 +108,34 @@ static void no_poune(const char *m)
 {
 	//no, do nothing
 
+	gchar* joinstr;
+	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:no,role:%d,number:%d,moves:NULL}]",
+			_global_status.id,_global_status.role,_global_status.number);
+	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
+	g_signal_emit_by_name(_global_status.conv->entry,"message_send");
+	g_free(joinstr);
+
 }
 
 static void send_gmchess(const char *mv)
 {
-	char *cmd;
-	cmd = g_strdup_printf("gmchess %s", mv);
-	system(cmd);
-	g_free(cmd);
+	gchar* argv[3];
+	argv[0]="gmchess";
+	argv[1]=(gchar*) mv;
+	argv[2]=NULL;
+	GError * err;
+	GSpawnFlags flas = (GSpawnFlags)(G_SPAWN_SEARCH_PATH |
+		       	G_SPAWN_STDOUT_TO_DEV_NULL |
+		       	G_SPAWN_STDERR_TO_DEV_NULL);
+	g_spawn_async(NULL,
+			argv,
+			NULL,
+			flas,
+			NULL,
+			NULL,
+			NULL,
+			&err);
+	
 }
 
 static gboolean
@@ -53,11 +147,15 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 	wrk = g_strsplit(*buffer, ",", -1);
 	g_assert(wrk);
 
-	if (strstr(wrk[0], "[{game:gmchess,") != NULL) {
+	if (strstr(wrk[0], "[{game:gmchess") != NULL) {
 
 		if (strstr(wrk[2], "action:ask") != NULL) {
 			if (strstr(wrk[3], "status:start")
 			    != NULL) {
+				//乱写一个，以后要把真正的id取出来
+				_global_status.id = 283;
+				_global_status.conv=PIDGIN_CONVERSATION(conv);
+
 				char *ask;
 				ask =
 				    g_strdup_printf
@@ -78,6 +176,13 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			}
 		} else if (strstr(wrk[2], "action:reply")
 			   != NULL) {
+			printf("receive %s\n",*buffer);
+			if(strstr(wrk[3],"status:ok")!= NULL){
+
+			}
+			else if(strstr(wrk[3],"status:no")!=NULL){
+
+			}
 
 		} else if (strstr(wrk[2], "action:working")
 			   != NULL) {
@@ -99,6 +204,16 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 static void
 gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 {
+	/** 如果id不为0,则可能在下棋中。退出*/
+	if(_global_status.id!=0){
+
+		return;
+		/*
+		char* ask;
+		ask = g_strdup_printf("You can only play a game in same time!");
+		purple_request_action("gmchess info","gmchess info",ask,"Please end the other game first",0
+		*/
+	}
 
 	gchar *joinstr;
 	guint32 session_id_;
@@ -110,6 +225,8 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	gtk_imhtml_append_text(GTK_IMHTML(gtkconv->entry), joinstr, FALSE);
 	g_signal_emit_by_name(gtkconv->entry, "message_send");
 	g_free(joinstr);
+
+	_global_status.id = session_id_ ;
 }
 
 static void create_gmchess_button_pidgin(PidginConversation * conv)
@@ -204,6 +321,18 @@ static gboolean plugin_load(PurplePlugin * plugin)
 
 	purple_debug(PURPLE_DEBUG_INFO, "plugins",
 		     "gmchess support plugin loaded.\n");
+	//int fd;
+	fd = create_socket();
+	if(fd==-1)
+		purple_debug(PURPLE_DEBUG_INFO,"plugins",
+				"gmchess pidgin bind socket error\n");
+	else{
+		io_channel = g_io_channel_unix_new(fd);
+		g_io_channel_set_encoding(io_channel,NULL,NULL);
+		source_id = g_io_add_watch(io_channel,G_IO_IN, read_socket,&fd);
+
+	}
+	init_gm_status();
 	return TRUE;
 }
 
@@ -222,6 +351,12 @@ static gboolean plugin_unload(PurplePlugin * plugin)
 	}
 	purple_debug(PURPLE_DEBUG_INFO, "plugins",
 		     "gmchess support plugin unloaded.\n");
+	if(fd != -1){
+		g_source_remove(source_id);
+		g_io_channel_shutdown(io_channel,TRUE,NULL);
+		g_io_channel_unref(io_channel);
+	}
+	init_gm_status();
 
 	return TRUE;
 }
