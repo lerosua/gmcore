@@ -82,25 +82,45 @@ gboolean read_socket(GIOChannel* source, GIOCondition condition,gpointer data)
 	size_t len=0;
 	len = read(fd_cli,&buf[0],1023);
 	buf[len]=0;
+	gchar* joinstr;
 	if(len>0){
 		printf("gmchess send %s\n",buf);
+		gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
+		gchar* my_name = g_strdup_printf("%s",_global_status.conv->active_conv->account->username);
+		joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:start,status:null,role:%d,number:%d,moves:%s,enemy_name:%s,my_name:%s}]",
+				_global_status.id,_global_status.role,_global_status.number,buf,enemy_name,my_name);
+		gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
+		g_signal_emit_by_name(_global_status.conv->entry,"message_send");
+		g_free(joinstr);
+		g_free(enemy_name);
+		g_free(my_name);
+
 	}
 	return TRUE;
 
 
 }
+#if 0
+static void send_network(const char* m)
+{
 
+}
+#endif
 static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
 	send_gmchess("network-game");
 	//then send reply to parter
 	gchar* joinstr;
-	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL}]",
-			_global_status.id,_global_status.role,_global_status.number);
+	gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
+	gchar* my_name = g_strdup_printf("%s",_global_status.conv->active_conv->account->username);
+	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+			_global_status.id,_global_status.role,_global_status.number,enemy_name,my_name);
 	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
 	g_signal_emit_by_name(_global_status.conv->entry,"message_send");
 	g_free(joinstr);
+	g_free(enemy_name);
+	g_free(my_name);
 
 }
 
@@ -109,11 +129,15 @@ static void no_poune(const char *m)
 	//no, do nothing
 
 	gchar* joinstr;
-	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:no,role:%d,number:%d,moves:NULL}]",
-			_global_status.id,_global_status.role,_global_status.number);
+	gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
+	gchar* my_name = g_strdup_printf("%s",_global_status.conv->active_conv->account->username);
+	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:no,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+			_global_status.id,_global_status.role,_global_status.number,enemy_name,my_name);
 	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
 	g_signal_emit_by_name(_global_status.conv->entry,"message_send");
 	g_free(joinstr);
+	g_free(enemy_name);
+	g_free(my_name);
 
 }
 
@@ -148,6 +172,14 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 	g_assert(wrk);
 
 	if (strstr(wrk[0], "[{game:gmchess") != NULL) {
+		gchar *my_name;
+		my_name= g_strdup_printf("my_name:%s",account->username);
+		if(strstr(wrk[8],my_name)!=NULL){
+			g_free(my_name);
+			return TRUE;
+		}
+		g_free(my_name);
+		
 
 		if (strstr(wrk[2], "action:ask") != NULL) {
 			if (strstr(wrk[3], "status:start")
@@ -214,17 +246,22 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 		purple_request_action("gmchess info","gmchess info",ask,"Please end the other game first",0
 		*/
 	}
+	gchar* enemy_name = g_strdup_printf("%s",gtkconv->active_conv->name);
+	gchar* my_name = g_strdup_printf("%s",gtkconv->active_conv->account->username);
 
 	gchar *joinstr;
 	guint32 session_id_;
 	session_id_ = g_random_int();
 	joinstr =
 	    g_strdup_printf
-	    ("[{game:gmchess,id:%X,action:ask,status:start}]",
-	     session_id_);
+	    ("[{game:gmchess,id:%X,action:ask,status:start,role:0,number:0,moves:null,enemy_name:%s,my_name:%s}]",
+	     session_id_,enemy_name,my_name);
 	gtk_imhtml_append_text(GTK_IMHTML(gtkconv->entry), joinstr, FALSE);
 	g_signal_emit_by_name(gtkconv->entry, "message_send");
+	printf("send joinstr %s\n",joinstr);
 	g_free(joinstr);
+	g_free(enemy_name);
+	g_free(my_name);
 
 	_global_status.id = session_id_ ;
 }

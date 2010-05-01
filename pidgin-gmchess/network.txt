@@ -10,9 +10,9 @@ gmchess protocol
 4.role:red/black			      --此次游戏本人角色
 5.number:xx			      --此次游戏进行的阶段数
 6.moves:c2b2  			      --此步的走法
-7.error:xxx
-8.enemy_name:xxx
-9.name:xxx
+7.enemy_name:xxx
+8.my_name:xxx
+9.error:xxx
 
 
 
@@ -25,7 +25,7 @@ b返回请求
 a发开始
 [{game:gmchess,id:18293839,action:start,status:null,role:red,number:0,moves:null,enemy_name:wind,name:lerosua}]
 b回发确认开始
-[{game:gmchess,id:18293839,action:start,status:ok,role:black,number:0,moves:null,enemy_name:wind,name:lerosua}]
+[{game:gmchess,id:18293839,action:start,status:ok,role:black,number:0,moves:null,enemy_name:lerosua,name:wind}]
 如此，a和b都将gmchess调至网战状态。
 
 a下第一步棋并发送
