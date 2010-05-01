@@ -33,13 +33,13 @@
  *	 2 请求和棋
  *	 3 请求悔棋
  */
-typedef struct gmstatus_{
+typedef struct gmstatus_ {
 	guint32 id;
 	int role;
 	int number;
 	int ask;
-	PidginConversation * conv;
-}gmstatus;
+	PidginConversation *conv;
+} gmstatus;
 
 static void send_gmchess(const char *mv);
 GIOChannel *io_channel;
@@ -50,59 +50,79 @@ static gmstatus _global_status;
 
 static void init_gm_status()
 {
-	_global_status.id=0;
-	_global_status.role=0;
-	_global_status.number=0;
-	_global_status.ask=0;
-	_global_status.conv=NULL;
+	_global_status.id = 0;
+	_global_status.role = 0;
+	_global_status.number = 0;
+	_global_status.ask = 0;
+	_global_status.conv = NULL;
 
 }
+
 static int create_socket()
 {
 	int sockfd;
 	struct sockaddr_in srvaddr;
 
-	if(-1 == (sockfd=socket(AF_INET,SOCK_STREAM,0)))
+	if (-1 == (sockfd = socket(AF_INET, SOCK_STREAM, 0)))
 		return -1;
-	bzero(&srvaddr,sizeof(srvaddr));
-	srvaddr.sin_family=AF_INET;
-	srvaddr.sin_port=htons(GMPORT);
-	srvaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+	bzero(&srvaddr, sizeof(srvaddr));
+	srvaddr.sin_family = AF_INET;
+	srvaddr.sin_port = htons(GMPORT);
+	srvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	int on = 1;
-	if( -1 == (setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) )))
+	if (-1 ==
+	    (setsockopt
+	     (sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on))))
 		return -1;
-	if(bind(sockfd,(struct sockaddr*)&srvaddr,
-			sizeof(struct sockaddr))==-1){
+	if (bind(sockfd, (struct sockaddr *) &srvaddr,
+		 sizeof(struct sockaddr)) == -1) {
 		return -1;
 
 	}
-	if(-1 == listen(sockfd,128))
+	if (-1 == listen(sockfd, 128))
 		return -1;
 	return sockfd;
 }
 
-gboolean read_socket(GIOChannel* source, GIOCondition condition,gpointer data)
+gboolean read_socket(GIOChannel * source, GIOCondition condition,
+		     gpointer data)
 {
 	int fd_cli;
-	fd_cli=-1;
-	if(-1 == (fd_cli = accept(fd,NULL,0)));
+	fd_cli = -1;
+	if (-1 == (fd_cli = accept(fd, NULL, 0)));
 	char buf[1024];
-	size_t len=0;
-	len = read(fd_cli,&buf[0],1023);
-	buf[len]=0;
-	gchar* joinstr;
-	if(len>0){
-		printf("gmchess send %s\n",buf);
-		gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
-		gchar* my_name = g_strdup_printf("%s",_global_status.conv->active_conv->account->username);
-		joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,moves:%s,enemy_name:%s,my_name:%s}]",
-				_global_status.id,_global_status.role,_global_status.number,buf,enemy_name,my_name);
-		gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
-		g_signal_emit_by_name(_global_status.conv->entry,"message_send");
-		g_free(joinstr);
-		g_free(enemy_name);
-		g_free(my_name);
+	size_t len = 0;
+	len = read(fd_cli, &buf[0], 1023);
+	buf[len] = 0;
+	gchar *joinstr;
+	if (len > 0) {
+		printf("gmchess send %s\n", buf);
+		if (_global_status.conv) {
+			gchar *enemy_name =
+			    g_strdup_printf("%s",
+					    _global_status.conv->
+					    active_conv->name);
+			gchar *my_name =
+			    g_strdup_printf("%s",
+					    _global_status.conv->
+					    active_conv->account->
+					    username);
+			joinstr =
+			    g_strdup_printf
+			    ("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,moves:%s,enemy_name:%s,my_name:%s}]",
+			     _global_status.id, _global_status.role,
+			     _global_status.number, buf, enemy_name,
+			     my_name);
+			gtk_imhtml_append_text(GTK_IMHTML
+					       (_global_status.conv->
+						entry), joinstr, FALSE);
+			g_signal_emit_by_name(_global_status.conv->entry,
+					      "message_send");
+			g_free(joinstr);
+			g_free(enemy_name);
+			g_free(my_name);
+		}
 
 	}
 	return TRUE;
@@ -114,15 +134,23 @@ static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
 	send_gmchess("network-game-black");
-	_global_status.role=0;
+	_global_status.role = 0;
 	//then send reply to parter
-	gchar* joinstr;
-	gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
-	gchar* my_name = g_strdup_printf("%s",_global_status.conv->active_conv->account->username);
-	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
-			_global_status.id,_global_status.role,_global_status.number,enemy_name,my_name);
-	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
-	g_signal_emit_by_name(_global_status.conv->entry,"message_send");
+	gchar *joinstr;
+	gchar *enemy_name =
+	    g_strdup_printf("%s", _global_status.conv->active_conv->name);
+	gchar *my_name =
+	    g_strdup_printf("%s",
+			    _global_status.conv->active_conv->account->
+			    username);
+	joinstr =
+	    g_strdup_printf
+	    ("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+	     _global_status.id, _global_status.role, _global_status.number,
+	     enemy_name, my_name);
+	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),
+			       joinstr, FALSE);
+	g_signal_emit_by_name(_global_status.conv->entry, "message_send");
 	g_free(joinstr);
 	g_free(enemy_name);
 	g_free(my_name);
@@ -133,13 +161,21 @@ static void no_poune(const char *m)
 {
 	//no, do nothing
 
-	gchar* joinstr;
-	gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
-	gchar* my_name = g_strdup_printf("%s",_global_status.conv->active_conv->account->username);
-	joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:reply,status:no,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
-			_global_status.id,_global_status.role,_global_status.number,enemy_name,my_name);
-	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
-	g_signal_emit_by_name(_global_status.conv->entry,"message_send");
+	gchar *joinstr;
+	gchar *enemy_name =
+	    g_strdup_printf("%s", _global_status.conv->active_conv->name);
+	gchar *my_name =
+	    g_strdup_printf("%s",
+			    _global_status.conv->active_conv->account->
+			    username);
+	joinstr =
+	    g_strdup_printf
+	    ("[{game:gmchess,id:%X,action:reply,status:no,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+	     _global_status.id, _global_status.role, _global_status.number,
+	     enemy_name, my_name);
+	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),
+			       joinstr, FALSE);
+	g_signal_emit_by_name(_global_status.conv->entry, "message_send");
 	g_free(joinstr);
 	g_free(enemy_name);
 	g_free(my_name);
@@ -148,23 +184,16 @@ static void no_poune(const char *m)
 
 static void send_gmchess(const char *mv)
 {
-	gchar* argv[3];
-	argv[0]="gmchess";
-	argv[1]=(gchar*) mv;
-	argv[2]=NULL;
-	GError * err;
-	GSpawnFlags flas = (GSpawnFlags)(G_SPAWN_SEARCH_PATH |
-		       	G_SPAWN_STDOUT_TO_DEV_NULL |
-		       	G_SPAWN_STDERR_TO_DEV_NULL);
-	g_spawn_async(NULL,
-			argv,
-			NULL,
-			flas,
-			NULL,
-			NULL,
-			NULL,
-			&err);
-	
+	gchar *argv[3];
+	argv[0] = "gmchess";
+	argv[1] = (gchar *) mv;
+	argv[2] = NULL;
+	GError *err;
+	GSpawnFlags flas = (GSpawnFlags) (G_SPAWN_SEARCH_PATH |
+					  G_SPAWN_STDOUT_TO_DEV_NULL |
+					  G_SPAWN_STDERR_TO_DEV_NULL);
+	g_spawn_async(NULL, argv, NULL, flas, NULL, NULL, NULL, &err);
+
 }
 
 static gboolean
@@ -178,20 +207,21 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 
 	if (strstr(wrk[0], "[{game:gmchess") != NULL) {
 		gchar *my_name;
-		my_name= g_strdup_printf("my_name:%s",account->username);
-		if(strstr(wrk[8],my_name)!=NULL){
+		my_name = g_strdup_printf("my_name:%s", account->username);
+		if (strstr(wrk[8], my_name) != NULL) {
 			g_free(my_name);
 			return TRUE;
 		}
 		g_free(my_name);
-		
+
 
 		if (strstr(wrk[2], "action:ask") != NULL) {
 			if (strstr(wrk[3], "status:start")
 			    != NULL) {
 				//乱写一个，以后要把真正的id取出来
 				_global_status.id = 283;
-				_global_status.conv=PIDGIN_CONVERSATION(conv);
+				_global_status.conv =
+				    PIDGIN_CONVERSATION(conv);
 
 				char *ask;
 				ask =
@@ -213,22 +243,21 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			}
 		} else if (strstr(wrk[2], "action:reply")
 			   != NULL) {
-			if(strstr(wrk[3],"status:ok")!= NULL){
-				switch(_global_status.ask){
-					case 0:
-						break;
-					case 1:
-						send_gmchess("network-game-red");
-						_global_status.ask=0;
-						break;
-					case 2:
-						break;
-					case 3:
-						break;
+			if (strstr(wrk[3], "status:ok") != NULL) {
+				switch (_global_status.ask) {
+				case 0:
+					break;
+				case 1:
+					send_gmchess("network-game-red");
+					_global_status.ask = 0;
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
 				};
 
-			}
-			else if(strstr(wrk[3],"status:no")!=NULL){
+			} else if (strstr(wrk[3], "status:no") != NULL) {
 
 			}
 
@@ -253,17 +282,19 @@ static void
 gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 {
 	/** 如果id不为0,则可能在下棋中。退出*/
-	if(_global_status.id!=0){
+	if (_global_status.id != 0) {
 
 		return;
 		/*
-		char* ask;
-		ask = g_strdup_printf("You can only play a game in same time!");
-		purple_request_action("gmchess info","gmchess info",ask,"Please end the other game first",0
-		*/
+		   char* ask;
+		   ask = g_strdup_printf("You can only play a game in same time!");
+		   purple_request_action("gmchess info","gmchess info",ask,"Please end the other game first",0
+		 */
 	}
-	gchar* enemy_name = g_strdup_printf("%s",gtkconv->active_conv->name);
-	gchar* my_name = g_strdup_printf("%s",gtkconv->active_conv->account->username);
+	gchar *enemy_name =
+	    g_strdup_printf("%s", gtkconv->active_conv->name);
+	gchar *my_name =
+	    g_strdup_printf("%s", gtkconv->active_conv->account->username);
 
 	gchar *joinstr;
 	guint32 session_id_;
@@ -271,16 +302,16 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	joinstr =
 	    g_strdup_printf
 	    ("[{game:gmchess,id:%X,action:ask,status:start,role:0,number:0,moves:NULL,enemy_name:%s,my_name:%s}]",
-	     session_id_,enemy_name,my_name);
+	     session_id_, enemy_name, my_name);
 	gtk_imhtml_append_text(GTK_IMHTML(gtkconv->entry), joinstr, FALSE);
 	g_signal_emit_by_name(gtkconv->entry, "message_send");
-	printf("send joinstr %s\n",joinstr);
+	printf("send joinstr %s\n", joinstr);
 	g_free(joinstr);
 	g_free(enemy_name);
 	g_free(my_name);
 
-	_global_status.id = session_id_ ;
-	_global_status.ask=1;
+	_global_status.id = session_id_;
+	_global_status.ask = 1;
 }
 
 static void create_gmchess_button_pidgin(PidginConversation * conv)
@@ -377,13 +408,14 @@ static gboolean plugin_load(PurplePlugin * plugin)
 		     "gmchess support plugin loaded.\n");
 	//int fd;
 	fd = create_socket();
-	if(fd==-1)
-		purple_debug(PURPLE_DEBUG_INFO,"plugins",
-				"gmchess pidgin bind socket error\n");
-	else{
+	if (fd == -1)
+		purple_debug(PURPLE_DEBUG_INFO, "plugins",
+			     "gmchess pidgin bind socket error\n");
+	else {
 		io_channel = g_io_channel_unix_new(fd);
-		g_io_channel_set_encoding(io_channel,NULL,NULL);
-		source_id = g_io_add_watch(io_channel,G_IO_IN, read_socket,&fd);
+		g_io_channel_set_encoding(io_channel, NULL, NULL);
+		source_id =
+		    g_io_add_watch(io_channel, G_IO_IN, read_socket, &fd);
 
 	}
 	init_gm_status();
@@ -405,9 +437,9 @@ static gboolean plugin_unload(PurplePlugin * plugin)
 	}
 	purple_debug(PURPLE_DEBUG_INFO, "plugins",
 		     "gmchess support plugin unloaded.\n");
-	if(fd != -1){
+	if (fd != -1) {
 		g_source_remove(source_id);
-		g_io_channel_shutdown(io_channel,TRUE,NULL);
+		g_io_channel_shutdown(io_channel, TRUE, NULL);
 		g_io_channel_unref(io_channel);
 	}
 	init_gm_status();
