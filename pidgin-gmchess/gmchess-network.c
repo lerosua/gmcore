@@ -114,6 +114,7 @@ static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
 	send_gmchess("network-game-black");
+	_global_status.role=0;
 	//then send reply to parter
 	gchar* joinstr;
 	gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
@@ -218,6 +219,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 						break;
 					case 1:
 						send_gmchess("network-game-red");
+						_global_status.ask=0;
 						break;
 					case 2:
 						break;
