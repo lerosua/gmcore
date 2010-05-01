@@ -26,10 +26,18 @@
 #define GMCHESS_NETWORK_PLUGIN_ID "gmchess-network-game"
 #define GMPORT  20126
 
+/**
+ * gmstatus 里的ask值:
+ * ask : 0 则无问题
+ *	 1 请求开局
+ *	 2 请求和棋
+ *	 3 请求悔棋
+ */
 typedef struct gmstatus_{
 	guint32 id;
 	int role;
 	int number;
+	int ask;
 	PidginConversation * conv;
 }gmstatus;
 
@@ -45,6 +53,7 @@ static void init_gm_status()
 	_global_status.id=0;
 	_global_status.role=0;
 	_global_status.number=0;
+	_global_status.ask=0;
 	_global_status.conv=NULL;
 
 }
@@ -87,7 +96,7 @@ gboolean read_socket(GIOChannel* source, GIOCondition condition,gpointer data)
 		printf("gmchess send %s\n",buf);
 		gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
 		gchar* my_name = g_strdup_printf("%s",_global_status.conv->active_conv->account->username);
-		joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:start,status:null,role:%d,number:%d,moves:%s,enemy_name:%s,my_name:%s}]",
+		joinstr = g_strdup_printf("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,moves:%s,enemy_name:%s,my_name:%s}]",
 				_global_status.id,_global_status.role,_global_status.number,buf,enemy_name,my_name);
 		gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),joinstr,FALSE);
 		g_signal_emit_by_name(_global_status.conv->entry,"message_send");
@@ -100,16 +109,11 @@ gboolean read_socket(GIOChannel* source, GIOCondition condition,gpointer data)
 
 
 }
-#if 0
-static void send_network(const char* m)
-{
 
-}
-#endif
 static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
-	send_gmchess("network-game");
+	send_gmchess("network-game-black");
 	//then send reply to parter
 	gchar* joinstr;
 	gchar* enemy_name = g_strdup_printf("%s",_global_status.conv->active_conv->name);
@@ -208,8 +212,18 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			}
 		} else if (strstr(wrk[2], "action:reply")
 			   != NULL) {
-			printf("receive %s\n",*buffer);
 			if(strstr(wrk[3],"status:ok")!= NULL){
+				switch(_global_status.ask){
+					case 0:
+						break;
+					case 1:
+						send_gmchess("network-game-red");
+						break;
+					case 2:
+						break;
+					case 3:
+						break;
+				};
 
 			}
 			else if(strstr(wrk[3],"status:no")!=NULL){
@@ -254,7 +268,7 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	session_id_ = g_random_int();
 	joinstr =
 	    g_strdup_printf
-	    ("[{game:gmchess,id:%X,action:ask,status:start,role:0,number:0,moves:null,enemy_name:%s,my_name:%s}]",
+	    ("[{game:gmchess,id:%X,action:ask,status:start,role:0,number:0,moves:NULL,enemy_name:%s,my_name:%s}]",
 	     session_id_,enemy_name,my_name);
 	gtk_imhtml_append_text(GTK_IMHTML(gtkconv->entry), joinstr, FALSE);
 	g_signal_emit_by_name(gtkconv->entry, "message_send");
@@ -264,6 +278,7 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	g_free(my_name);
 
 	_global_status.id = session_id_ ;
+	_global_status.ask=1;
 }
 
 static void create_gmchess_button_pidgin(PidginConversation * conv)
