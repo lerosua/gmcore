@@ -97,8 +97,8 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 	buf[len] = 0;
 	gchar *joinstr;
 	if (len > 0) {
-		printf("gmchess send %s\n", buf);
 		if (_global_status.conv) {
+		printf("gmchess send %s\n", buf);
 			gchar *enemy_name =
 			    g_strdup_printf("%s",
 					    _global_status.conv->
@@ -312,6 +312,7 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 
 	_global_status.id = session_id_;
 	_global_status.ask = 1;
+	_global_status.conv = gtkconv;
 }
 
 static void create_gmchess_button_pidgin(PidginConversation * conv)
