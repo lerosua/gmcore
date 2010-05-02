@@ -209,6 +209,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		gchar *my_name;
 		my_name = g_strdup_printf("my_name:%s", account->username);
 		if (strstr(wrk[8], my_name) != NULL) {
+			printf("收到自己发出的包 =====%s\n",*buffer);
 			g_free(my_name);
 			return TRUE;
 		}
@@ -263,6 +264,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 
 		} else if (strstr(wrk[2], "action:working")
 			   != NULL) {
+			printf("应该发给gmchess的走法=====%s\n",*buffer);
 			send_gmchess(wrk[6]);
 			/*
 			   char * moves;
