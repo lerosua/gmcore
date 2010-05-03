@@ -171,7 +171,7 @@ static void info_poune(const char* m)
 static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
-	send_gmchess("network-game-black");
+	//send_gmchess("network-game-black");
 	_global_status.role = 0;
 	_global_status.number=0;
 	//then send reply to parter
@@ -182,6 +182,11 @@ static void ok_poune(const char *m)
 	    g_strdup_printf("%s",
 			    _global_status.conv->active_conv->account->
 			    username);
+	gchar* snd_str;
+	snd_str = g_strdup_printf("network-game-black,enemy_name:%s,my_name:%s",enemy_name,my_name);
+	send_gmchess(snd_str);
+	g_free(snd_str);
+
 	joinstr =
 	    g_strdup_printf
 	    ("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
@@ -299,7 +304,10 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 					break;
 				case 1:
 					//answer the start play
-					send_gmchess("network-game-red");
+					gchar* snd_str;
+					snd_str = g_strdup_printf("network-game-red,%s,%s",wrk[7],wrk[8]);
+					send_gmchess(snd_str);
+					g_free(snd_str);
 					_global_status.ask = 0;
 					_global_status.role = 1;
 					break;
