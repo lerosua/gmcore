@@ -7,7 +7,7 @@ gmchess protocol
 2.action:ask/reply/working 	      --此次游戏状态
 3.status:start/rue/draw/lose            --请求的具体内容
   status:ok/no			      --问话的回答
-4.role:red/black			      --此次游戏本人角色
+4.role:red/black	1/0		      --此次游戏本人角色
 5.number:xx			      --此次游戏进行的阶段数
 6.moves:c2b2  			      --此步的走法
 7.enemy_name:xxx

@@ -27,6 +27,8 @@
 #define GMPORT  20126
 
 /**
+ * role : 0 is black, 1 is red.
+ *
  * gmstatus 里的ask值:
  * ask : 0 则无问题
  *	 1 请求开局
@@ -42,6 +44,7 @@ typedef struct gmstatus_ {
 } gmstatus;
 
 static void send_gmchess(const char *mv);
+static guint32 get_session_id(const gchar* idstr);
 GIOChannel *io_channel;
 int source_id;
 int fd;
@@ -58,6 +61,19 @@ static void init_gm_status()
 
 }
 
+static guint32 get_session_id(const gchar* idstr)
+{
+	guint32 _id;
+	if(strstr(idstr,"id:")==NULL)
+		return 0;
+	gchar** getid;
+	getid = g_strsplit(idstr,":",-1);
+	g_assert(getid);
+	_id = g_ascii_strtoll(getid[1],NULL,16);
+	g_strfreev(getid);
+	return _id;
+
+}
 static int create_socket()
 {
 	int sockfd;
@@ -98,7 +114,7 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 	gchar *joinstr;
 	if (len > 0) {
 		if (_global_status.conv) {
-		printf("gmchess send %s\n", buf);
+			printf("gmchess send %s\n", buf);
 			gchar *enemy_name =
 			    g_strdup_printf("%s",
 					    _global_status.conv->
@@ -108,6 +124,8 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 					    _global_status.conv->
 					    active_conv->account->
 					    username);
+		if(strstr(buf, "moves:")!=NULL){
+			_global_status.number++;
 			joinstr =
 			    g_strdup_printf
 			    ("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,moves:%s,enemy_name:%s,my_name:%s}]",
@@ -120,6 +138,23 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 			g_signal_emit_by_name(_global_status.conv->entry,
 					      "message_send");
 			g_free(joinstr);
+		}
+		else if(strstr(buf, "resign")!=NULL){
+			joinstr =
+			    g_strdup_printf
+			    ("[{game:gmchess,id:%X,action:ask,status:lose,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+			     _global_status.id, _global_status.role,
+			     _global_status.number, enemy_name,
+			     my_name);
+			gtk_imhtml_append_text(GTK_IMHTML
+					       (_global_status.conv->
+						entry), joinstr, FALSE);
+			g_signal_emit_by_name(_global_status.conv->entry,
+					      "message_send");
+			g_free(joinstr);
+
+
+			}
 			g_free(enemy_name);
 			g_free(my_name);
 		}
@@ -130,11 +165,15 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 
 }
 
+static void info_poune(const char* m)
+{
+}
 static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
 	send_gmchess("network-game-black");
 	_global_status.role = 0;
+	_global_status.number=0;
 	//then send reply to parter
 	gchar *joinstr;
 	gchar *enemy_name =
@@ -219,8 +258,14 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		if (strstr(wrk[2], "action:ask") != NULL) {
 			if (strstr(wrk[3], "status:start")
 			    != NULL) {
-				//乱写一个，以后要把真正的id取出来
-				_global_status.id = 283;
+				/*
+				gchar** getid;
+				getid = g_strsplit(wrk[1],":",-1);
+				g_assert(getid);
+				_global_status.id = g_ascii_strtoll(getid[1],NULL,16);
+				g_strfreev(getid);
+				*/
+				_global_status.id = get_session_id(wrk[1]);
 				_global_status.conv =
 				    PIDGIN_CONVERSATION(conv);
 
@@ -240,6 +285,10 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			} else if (strstr(wrk[3], "status:rue") != NULL) {
 			} else if (strstr(wrk[3], "status:draw") != NULL) {
 			} else if (strstr(wrk[3], "status:lose") != NULL) {
+				//对方认输。结束此局
+				send_gmchess("network-game-win");
+				init_gm_status();
+
 
 			}
 		} else if (strstr(wrk[2], "action:reply")
@@ -249,8 +298,10 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 				case 0:
 					break;
 				case 1:
+					//answer the start play
 					send_gmchess("network-game-red");
 					_global_status.ask = 0;
+					_global_status.role = 1;
 					break;
 				case 2:
 					break;
@@ -259,6 +310,25 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 				};
 
 			} else if (strstr(wrk[3], "status:no") != NULL) {
+				switch (_global_status.ask) {
+				case 0:
+					break;
+				case 1:
+					//answer the start play
+					_global_status.id = 0;
+				purple_request_action
+				    ("gmchess info",
+				     "gmchess info", "answer",
+				     "the other side deny your request!",
+				     0, account, who, conv,
+				     "test", 2, "Yes",
+				     info_poune, "No", info_poune);
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				};
 
 			}
 
@@ -274,6 +344,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			   g_free(moves);
 			 */
 		}
+		g_strfreev(wrk);
 		return TRUE;
 	} else {
 		return FALSE;
