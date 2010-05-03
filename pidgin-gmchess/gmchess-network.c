@@ -128,7 +128,7 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 			_global_status.number++;
 			joinstr =
 			    g_strdup_printf
-			    ("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,moves:%s,enemy_name:%s,my_name:%s}]",
+			    ("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,%s,enemy_name:%s,my_name:%s}]",
 			     _global_status.id, _global_status.role,
 			     _global_status.number, buf, enemy_name,
 			     my_name);
