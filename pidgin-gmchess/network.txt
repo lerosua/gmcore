@@ -12,7 +12,8 @@ gmchess protocol
 6.moves:c2b2  			      --此步的走法
 7.enemy_name:xxx
 8.my_name:xxx
-9.error:xxx
+9.version:0.01
+10.error:xxx
 
 
 

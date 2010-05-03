@@ -24,6 +24,7 @@
 
 /** Plugin id : type-author-name (to guarantee uniqueness) */
 #define GMCHESS_NETWORK_PLUGIN_ID "gmchess-network-game"
+#define GMVERSION "version:0.01"
 #define GMPORT  20126
 
 /**
@@ -170,6 +171,34 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 
 }
 
+// check the pacake is valid
+static gboolean check_package(const char* buf)
+{
+	if(strstr(buf,"[{game:gmchess,")==NULL)
+		return FALSE;
+	if(strstr(buf,",id:")==NULL)
+		return FALSE;
+	if(strstr(buf,",action:")==NULL)
+		return FALSE;
+	if(strstr(buf,",status:")==NULL)
+		return FALSE;
+	if(strstr(buf,",role:")==NULL)
+		return FALSE;
+	if(strstr(buf,",number:")==NULL)
+		return FALSE;
+	if(strstr(buf,",moves:")==NULL)
+		return FALSE;
+	if(strstr(buf,",enemy_name:")==NULL)
+		return FALSE;
+	if(strstr(buf,",my_name:")==NULL)
+		return FALSE;
+	if(strstr(buf,"}]")==NULL)
+		return FALSE;
+	return TRUE;
+
+
+
+}
 static void info_poune(const char *m)
 {
 }
@@ -252,10 +281,11 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		  void *data)
 {
 	gchar **wrk;
-	wrk = g_strsplit(*buffer, ",", -1);
-	g_assert(wrk);
 
-	if (strstr(wrk[0], "[{game:gmchess") != NULL) {
+	//if ((strstr(*buffer, "[{game:gmchess,") != NULL)&&(strstr(*buffer,"}]")!=NULL)) {
+	if(check_package(*buffer)){
+		wrk = g_strsplit(*buffer, ",", -1);
+		g_assert(wrk);
 		gchar *my_name;
 		my_name = g_strdup_printf("my_name:%s", account->username);
 		if (strstr(wrk[8], my_name) != NULL) {
@@ -271,6 +301,18 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			if (strstr(wrk[3], "status:start")
 			    != NULL) {
 
+				if(strstr(*buffer,"version:0.01")==NULL){
+
+					purple_request_action
+					    ("gmchess info",
+					     "gmchess info", "Warning",
+					     "gmchess for pidgin plugins version not matching!",
+					     0, account, who, conv,
+					     "test", 2, "Yes",
+					     no_poune, "No", no_poune);
+
+					return TRUE;
+				}
 				_global_status.id = get_session_id(wrk[1]);
 				_global_status.conv =
 				    PIDGIN_CONVERSATION(conv);
@@ -357,6 +399,11 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			   g_free(moves);
 			 */
 		}
+		else{
+			g_strfreev(wrk);
+			return FALSE;
+
+		}
 		g_strfreev(wrk);
 		return TRUE;
 	} else {
@@ -387,7 +434,7 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	session_id_ = g_random_int();
 	joinstr =
 	    g_strdup_printf
-	    ("[{game:gmchess,id:%X,action:ask,status:start,role:0,number:0,moves:NULL,enemy_name:%s,my_name:%s}]",
+	    ("[{game:gmchess,id:%X,action:ask,status:start,role:0,number:0,moves:NULL,enemy_name:%s,my_name:%s,version:0.01}]",
 	     session_id_, enemy_name, my_name);
 	gtk_imhtml_append_text(GTK_IMHTML(gtkconv->entry), joinstr, FALSE);
 	g_signal_emit_by_name(gtkconv->entry, "message_send");
