@@ -301,6 +301,8 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			if (strstr(wrk[3], "status:start")
 			    != NULL) {
 
+				_global_status.conv =
+				    PIDGIN_CONVERSATION(conv);
 				if(strstr(*buffer,"version:0.01")==NULL){
 
 					purple_request_action
@@ -314,8 +316,6 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 					return TRUE;
 				}
 				_global_status.id = get_session_id(wrk[1]);
-				_global_status.conv =
-				    PIDGIN_CONVERSATION(conv);
 
 				char *ask;
 				ask =
