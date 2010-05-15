@@ -379,14 +379,21 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 					break;
 				case 1:
 					//answer the start play
+					_global_status.respond =1;
 					snd_str =
 					    g_strdup_printf
 					    ("network-game-red,%s,%s",
 					     wrk[7], wrk[8]);
 					send_gmchess(snd_str);
+
+					if(_global_status.timeout_id){
+						g_source_remove(_global_status.timeout_id);
+						_global_status.timeout_id =  0;
+					}
 					g_free(snd_str);
 					_global_status.ask = 0;
 					_global_status.role = 1;
+
 					break;
 				case 2:
 					break;
@@ -400,7 +407,8 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 					break;
 				case 1:
 					//answer the start play
-					_global_status.id = 0;
+					init_gm_status();
+					
 					purple_request_action
 					    ("gmchess info",
 					     "gmchess info", "answer",
