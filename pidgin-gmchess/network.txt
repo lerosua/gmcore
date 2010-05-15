@@ -5,7 +5,7 @@ gmchess protocol
 0.game:gmchess                          --游戏标识
 1.id:xxxxx			      --此次游戏会话id,随机生成并保存，以后比较
 2.action:ask/reply/working 	      --此次游戏状态
-3.status:start/rue/draw/lose            --请求的具体内容
+3.status:start/rue/draw/lose/close            --请求的具体内容
   status:ok/no			      --问话的回答
 4.role:red/black	1/0		      --此次游戏本人角色
 5.number:xx			      --此次游戏进行的阶段数

@@ -41,15 +41,20 @@ typedef struct gmstatus_ {
 	int role;
 	int number;
 	int ask;
+	int respond;
+	guint timeout_id;
 	PidginConversation *conv;
 } gmstatus;
 
 static void send_gmchess(const char *mv);
 static guint32 get_session_id(const gchar * idstr);
+static gboolean timeout_call(gpointer data);
 GIOChannel *io_channel;
 int source_id;
 int fd;
 static gmstatus _global_status;
+//_global_status.timeout_id=0;
+
 
 
 static void init_gm_status()
@@ -58,6 +63,11 @@ static void init_gm_status()
 	_global_status.role = 0;
 	_global_status.number = 0;
 	_global_status.ask = 0;
+	_global_status.respond=0;
+	if(_global_status.timeout_id){
+		g_source_remove(_global_status.timeout_id);
+		_global_status.timeout_id=0;
+	}
 	_global_status.conv = NULL;
 
 }
@@ -159,6 +169,23 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 						      "message_send");
 				g_free(joinstr);
 
+
+			} else if(strstr(buf,"close") != NULL) {
+				joinstr =
+				    g_strdup_printf
+				    ("[{game:gmchess,id:%X,action:ask,status:close,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+				     _global_status.id,
+				     _global_status.role,
+				     _global_status.number, enemy_name,
+				     my_name);
+				gtk_imhtml_append_text(GTK_IMHTML
+						       (_global_status.
+							conv->entry),
+						       joinstr, FALSE);
+				g_signal_emit_by_name(_global_status.conv->
+						      entry,
+						      "message_send");
+				g_free(joinstr);
 
 			}
 			g_free(enemy_name);
@@ -338,6 +365,10 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 				init_gm_status();
 
 
+			} else if(strstr(wrk[3], "status:close") !=NULL) {
+				//对方关闭棋局，先当输的处理
+				send_gmchess("network-game-win");
+				init_gm_status();
 			}
 		} else if (strstr(wrk[2], "action:reply")
 			   != NULL) {
@@ -411,18 +442,34 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 	}
 }
 
+static gboolean
+timeout_call(gpointer data)
+{
+	if(1 == _global_status.respond && 1 == _global_status.ask  ){
+
+	}else{
+		purple_debug(PURPLE_DEBUG_INFO, "plugins",
+		     "send the ask start game not respond,give up it.\n");
+		init_gm_status();
+	}
+	return FALSE;
+}
+
 static void
 gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 {
-	/** 如果id不为0,则可能在下棋中。退出*/
-	if (_global_status.id != 0) {
+	/** 如果ask不为0,则可能在下棋中。退出*/
+	if (_global_status.ask != 0) {
 
+			purple_request_action
+			    ("gmchess info",
+			     "gmchess info", "Info",
+			     "wait for one game over!",
+			     0, NULL, NULL, NULL,
+			     "test", 2, "Yes",
+			     info_poune, "No", info_poune);
 		return;
-		/*
-		   char* ask;
-		   ask = g_strdup_printf("You can only play a game in same time!");
-		   purple_request_action("gmchess info","gmchess info",ask,"Please end the other game first",0
-		 */
+		
 	}
 	gchar *enemy_name =
 	    g_strdup_printf("%s", gtkconv->active_conv->name);
@@ -446,6 +493,8 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	_global_status.id = session_id_;
 	_global_status.ask = 1;
 	_global_status.conv = gtkconv;
+
+	_global_status.timeout_id = g_timeout_add_seconds(30, timeout_call,NULL);
 }
 
 static void create_gmchess_button_pidgin(PidginConversation * conv)
