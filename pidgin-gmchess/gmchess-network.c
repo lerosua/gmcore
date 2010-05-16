@@ -71,6 +71,17 @@ static void init_gm_status()
 	_global_status.conv = NULL;
 
 }
+static void gtk_info_msg(const gchar* msg)
+{
+	//gchar* header;
+	//GtkIMHtmlOptions options = GTK_IMHTML_NO_COLOURS;
+	//header = g_strdup_printf(_("<b> %s </b><br><hr>"),msg);
+	//gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv),header,options);
+	//purple_notify_error(NULL,NULL,"info",header);
+	//g_free(header);
+	purple_notify_info(NULL,"pidgin-gmchess","info",msg);
+
+}
 
 static guint32 get_session_id(const gchar * idstr)
 {
@@ -226,10 +237,6 @@ static gboolean check_package(const char* buf)
 
 
 }
-static void info_poune(const char *m)
-{
-}
-
 static void ok_poune(const char *m)
 {
 	//ok，start the gmchess game
@@ -258,6 +265,8 @@ static void ok_poune(const char *m)
 	gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),
 			       joinstr, FALSE);
 	g_signal_emit_by_name(_global_status.conv->entry, "message_send");
+
+	//gtk_info_msg("网络象棋对战开始");
 	g_free(joinstr);
 	g_free(enemy_name);
 	g_free(my_name);
@@ -332,14 +341,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 				    PIDGIN_CONVERSATION(conv);
 				if(strstr(*buffer,"version:0.01")==NULL){
 
-					purple_request_action
-					    ("gmchess info",
-					     "gmchess info", "Warning",
-					     "gmchess for pidgin plugins version not matching!",
-					     0, account, who, conv,
-					     "test", 2, "Yes",
-					     no_poune, "No", no_poune);
-
+					gtk_info_msg("gmchess for pidgin plugins version not matching!");
 					return TRUE;
 				}
 				_global_status.id = get_session_id(wrk[1]);
@@ -393,6 +395,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 					g_free(snd_str);
 					_global_status.ask = 0;
 					_global_status.role = 1;
+					//gtk_info_msg("network gmchess start");
 
 					break;
 				case 2:
@@ -408,14 +411,8 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 				case 1:
 					//answer the start play
 					init_gm_status();
+					gtk_info_msg("对方拒绝了对战请求");
 					
-					purple_request_action
-					    ("gmchess info",
-					     "gmchess info", "answer",
-					     "the other side deny your request!",
-					     0, account, who, conv,
-					     "test", 2, "Yes",
-					     info_poune, "No", info_poune);
 					break;
 				case 2:
 					break;
@@ -458,7 +455,9 @@ timeout_call(gpointer data)
 	}else{
 		purple_debug(PURPLE_DEBUG_INFO, "plugins",
 		     "send the ask start game not respond,give up it.\n");
+		gtk_info_msg("对方未回应，可能是未装有相应插件");
 		init_gm_status();
+		
 	}
 	return FALSE;
 }
@@ -466,19 +465,15 @@ timeout_call(gpointer data)
 static void
 gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 {
-	/** 如果ask不为0,则可能在下棋中。退出*/
-	if (_global_status.ask != 0) {
+	/** 如果id不为0,则可能在下棋中。退出*/
+	if (_global_status.id != 0) {
 
-			purple_request_action
-			    ("gmchess info",
-			     "gmchess info", "Info",
-			     "wait for one game over!",
-			     0, NULL, NULL, NULL,
-			     "test", 2, "Yes",
-			     info_poune, "No", info_poune);
+		gtk_info_msg("请不要重复发送邀请");
+	
 		return;
 		
 	}
+	gtk_info_msg("发送邀请中");
 	gchar *enemy_name =
 	    g_strdup_printf("%s", gtkconv->active_conv->name);
 	gchar *my_name =
@@ -650,7 +645,7 @@ static PurplePluginInfo info = {
 
 	GMCHESS_NETWORK_PLUGIN_ID,				   /**< id             */
 	N_("gmchess network play game support."),				  /**< name           */
-	"1.0",							/**< version        */
+	"0.01",							/**< version        */
 							  /**  summary        */
 	N_("gmchess network play game support."),
 							  /**  description    */
