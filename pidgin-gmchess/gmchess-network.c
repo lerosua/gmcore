@@ -179,6 +179,7 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 						      entry,
 						      "message_send");
 				g_free(joinstr);
+				init_gm_status();
 
 
 			} else if(strstr(buf,"close") != NULL) {
@@ -197,6 +198,7 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 						      entry,
 						      "message_send");
 				g_free(joinstr);
+				init_gm_status();
 
 			}
 			g_free(enemy_name);
@@ -473,7 +475,7 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 		return;
 		
 	}
-	gtk_info_msg("发送邀请中");
+	//gtk_info_msg("发送邀请中");
 	gchar *enemy_name =
 	    g_strdup_printf("%s", gtkconv->active_conv->name);
 	gchar *my_name =
