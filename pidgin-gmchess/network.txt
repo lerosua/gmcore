@@ -1,6 +1,5 @@
 
-gmchess protocol
-
+gmchess protocol(0.01 试用 2010.4.10)
 
 0.game:gmchess                          --游戏标识
 1.id:xxxxx			      --此次游戏会话id,随机生成并保存，以后比较

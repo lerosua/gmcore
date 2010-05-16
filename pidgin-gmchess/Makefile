@@ -4,7 +4,8 @@ all:
 install:
 	#cp gmchess-network.so /usr/lib/pidgin
 	cp gmchess-network.so ${HOME}/.purple/plugins/
-	#cp gmchess.png /usr/share/icons/hicolor/22x22/apps/
+	mkdir -p /usr/share/icons/hicolor/22x22/apps/
+	cp gmchess.png /usr/share/icons/hicolor/22x22/apps/
 
 install-user:
 	mkdir -p ${HOME}/.purple/plugins
