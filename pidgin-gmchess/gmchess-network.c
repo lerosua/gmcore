@@ -80,7 +80,7 @@ static void gtk_info_msg(const gchar * msg)
     //gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv),header,options);
     //purple_notify_error(NULL,NULL,"info",header);
     //g_free(header);
-    purple_notify_info(NULL, "pidgin-gmchess", "info", msg);
+    purple_notify_info(NULL, "pidgin-gmchess", _("info"), msg);
 
 }
 
@@ -137,7 +137,8 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
     gchar *joinstr;
     if (len > 0) {
 	if (_global_status.conv) {
-	    printf("gmchess send %s\n", buf);
+	    purple_debug(PURPLE_DEBUG_INFO, "plugins",
+		     "gmchess send %s.\n",buf);
 	    gchar *enemy_name = g_strdup_printf("%s",
 						_global_status.conv->
 						active_conv->name);
@@ -318,7 +319,8 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 	gchar *my_name;
 	my_name = g_strdup_printf("my_name:%s", account->username);
 	if (strstr(wrk[8], my_name) != NULL) {
-	    printf("收到自己发出的包 =====%s\n", *buffer);
+	    purple_debug(PURPLE_DEBUG_INFO, "plugins",
+			    "receive the package of my %s\n", *buffer);
 	    g_free(my_name);
 	    return TRUE;
 	}
@@ -333,7 +335,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		if (strstr(*buffer, "version:0.01") == NULL) {
 
 		    gtk_info_msg
-			("gmchess for pidgin plugins version not matching!");
+			(_("gmchess for pidgin plugins version not matching!"));
 		    return TRUE;
 		}
 		_global_status.id = get_session_id(wrk[1]);
@@ -400,7 +402,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		case 1:
 		    //answer the start play
 		    init_gm_status();
-		    gtk_info_msg("对方拒绝了对战请求");
+		    gtk_info_msg(_("The other side deny the invite"));
 
 		    break;
 		case 2:
@@ -413,7 +415,8 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 
 	} else if (strstr(wrk[2], "action:working")
 		   != NULL) {
-	    printf("应该发给gmchess的走法=====%s\n", *buffer);
+	    purple_debug(PURPLE_DEBUG_INFO, "plugins",
+			    "should send the gmchess'moves: %s\n", *buffer);
 	    send_gmchess(wrk[6]);
 	    /*
 	       char * moves;
@@ -441,7 +444,7 @@ static gboolean timeout_call(gpointer data)
     } else {
 	purple_debug(PURPLE_DEBUG_INFO, "plugins",
 		     "send the ask start game not respond,give up it.\n");
-	gtk_info_msg("对方未回应，可能是未装有相应插件");
+	gtk_info_msg(_("there has no respond. the other side maybe not install the gmchess plugins"));
 	init_gm_status();
 
     }
@@ -454,7 +457,7 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	/** 如果id不为0,则可能在下棋中。退出*/
     if (_global_status.id != 0) {
 
-	gtk_info_msg("请不要重复发送邀请");
+	gtk_info_msg(_("Please do not repeat invite. "));
 
 	return;
 
@@ -473,7 +476,8 @@ gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 	 session_id_, enemy_name, my_name);
     gtk_imhtml_append_text(GTK_IMHTML(gtkconv->entry), joinstr, FALSE);
     g_signal_emit_by_name(gtkconv->entry, "message_send");
-    printf("send joinstr %s\n", joinstr);
+    purple_debug(PURPLE_DEBUG_INFO, "plugins",
+			    "send joinstr: %s\n", joinstr);
     g_free(joinstr);
     g_free(enemy_name);
     g_free(my_name);
