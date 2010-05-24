@@ -558,6 +558,11 @@ static gboolean plugin_load(PurplePlugin * plugin)
 			  plugin,
 			  PURPLE_CALLBACK
 			  (create_gmchess_button_pidgin), NULL);
+    purple_signal_connect(gtk_conv_handle,
+			  "conversation-hiding",
+			  plugin,
+			  PURPLE_CALLBACK
+			  (remove_gmchess_button_pidgin), NULL);
     while (convs) {
 	PurpleConversation *conv = (PurpleConversation *) convs->data;
 	/* Setup gmchess button */
