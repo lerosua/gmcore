@@ -27,6 +27,7 @@
 #define GMVERSION "version:0.01"
 #define GMPORT  20126
 
+enum { QUES_NO = 0, QUES_PLAY, QUES_DRAW, QUES_RUE };
 /**
  * role : 0 is black, 1 is red.
  *
@@ -36,6 +37,7 @@
  *	 2 请求和棋
  *	 3 请求悔棋
  */
+
 typedef struct gmstatus_ {
     guint32 id;
     int role;
@@ -191,6 +193,33 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 		g_free(joinstr);
 		init_gm_status();
 
+	    } else if (strstr(buf, "rue") != NULL) {
+		joinstr =
+		    g_strdup_printf
+		    ("[{game:gmchess,id:%X,action:ask,status:rue,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+		     _global_status.id,
+		     _global_status.role,
+		     _global_status.number, enemy_name, my_name);
+		gtk_imhtml_append_text(GTK_IMHTML
+				       (_global_status.conv->entry),
+				       joinstr, FALSE);
+		g_signal_emit_by_name(_global_status.conv->entry,
+				      "message_send");
+		g_free(joinstr);
+
+	    } else if (strstr(buf, "draw") != NULL) {
+		joinstr =
+		    g_strdup_printf
+		    ("[{game:gmchess,id:%X,action:ask,status:draw,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+		     _global_status.id,
+		     _global_status.role,
+		     _global_status.number, enemy_name, my_name);
+		gtk_imhtml_append_text(GTK_IMHTML
+				       (_global_status.conv->entry),
+				       joinstr, FALSE);
+		g_signal_emit_by_name(_global_status.conv->entry,
+				      "message_send");
+		g_free(joinstr);
 	    }
 	    g_free(enemy_name);
 	    g_free(my_name);
@@ -244,23 +273,56 @@ static void ok_poune(const char *m)
     gchar *my_name = g_strdup_printf("%s",
 				     _global_status.conv->
 				     active_conv->account->username);
-    gchar *snd_str;
-    snd_str =
-	g_strdup_printf("network-game-black,enemy_name:%s,my_name:%s",
-			enemy_name, my_name);
-    send_gmchess(snd_str);
-    g_free(snd_str);
+    switch(_global_status.ask){
+	    case QUES_PLAY:
+		    {
+			    gchar *snd_str;
+			    snd_str =
+				    g_strdup_printf("network-game-black,enemy_name:%s,my_name:%s",
+						    enemy_name, my_name);
+			    send_gmchess(snd_str);
+			    g_free(snd_str);
 
-    joinstr =
-	g_strdup_printf
-	("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
-	 _global_status.id, _global_status.role, _global_status.number,
-	 enemy_name, my_name);
-    gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),
-			   joinstr, FALSE);
-    g_signal_emit_by_name(_global_status.conv->entry, "message_send");
+			    joinstr =
+				    g_strdup_printf
+				    ("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+				     _global_status.id, _global_status.role, _global_status.number,
+				     enemy_name, my_name);
+			    gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),
+					    joinstr, FALSE);
+			    g_signal_emit_by_name(_global_status.conv->entry, "message_send");
+		    }
+		    break;
+	    case QUES_DRAW:
+		    {
+			    joinstr =
+				    g_strdup_printf
+				    ("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+				     _global_status.id, _global_status.role, _global_status.number,
+				     enemy_name, my_name);
+			    gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),
+					    joinstr, FALSE);
+			    g_signal_emit_by_name(_global_status.conv->entry, "message_send");
 
-    //gtk_info_msg("网络象棋对战开始");
+			    send_gmchess("network-game-draw");
+		    }
+		    break;
+	    case QUES_RUE:
+			{
+			    joinstr =
+				    g_strdup_printf
+				    ("[{game:gmchess,id:%X,action:reply,status:ok,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+				     _global_status.id, _global_status.role, _global_status.number,
+				     enemy_name, my_name);
+			    gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv->entry),
+					    joinstr, FALSE);
+			    g_signal_emit_by_name(_global_status.conv->entry, "message_send");
+
+			    send_gmchess("network-game-rue");
+		    }
+		    break;
+    }
+
     g_free(joinstr);
     g_free(enemy_name);
     g_free(my_name);
@@ -339,6 +401,7 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		    return TRUE;
 		}
 		_global_status.id = get_session_id(wrk[1]);
+		_global_status.ask = QUES_PLAY;
 
 		char *ask;
 		ask =
@@ -352,7 +415,31 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		     "test", 2, "Yes", ok_poune, "No", no_poune);
 		g_free(ask);
 	    } else if (strstr(wrk[3], "status:rue") != NULL) {
+		_global_status.ask = QUES_RUE;
+		char *ask;
+		ask =
+		    g_strdup_printf
+		    (" %s is asking you to rue a move!", who);
+		purple_request_action
+		    ("gmchess ask",
+		     "gmchess ask", ask,
+		     "Do you agree rue move for him?",
+		     0, account, who, conv,
+		     "test", 2, "Yes", ok_poune, "No", no_poune);
+		g_free(ask);
 	    } else if (strstr(wrk[3], "status:draw") != NULL) {
+		_global_status.ask = QUES_DRAW;
+		char *ask;
+		ask =
+		    g_strdup_printf
+		    (" %s is asking you to draw the game!", who);
+		purple_request_action
+		    ("gmchess ask",
+		     "gmchess ask", ask,
+		     "Do you agree draw?",
+		     0, account, who, conv,
+		     "test", 2, "Yes", ok_poune, "No", no_poune);
+		g_free(ask);
 	    } else if (strstr(wrk[3], "status:lose") != NULL) {
 		//对方认输。结束此局
 		send_gmchess("network-game-win");
@@ -369,9 +456,9 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 	    if (strstr(wrk[3], "status:ok") != NULL) {
 		gchar *snd_str;
 		switch (_global_status.ask) {
-		case 0:
+		case QUES_NO:
 		    break;
-		case 1:
+		case QUES_PLAY:
 		    //answer the start play
 		    _global_status.respond = 1;
 		    snd_str =
@@ -384,14 +471,20 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 			_global_status.timeout_id = 0;
 		    }
 		    g_free(snd_str);
-		    _global_status.ask = 0;
+		    _global_status.ask = QUES_NO;
 		    _global_status.role = 1;
 		    //gtk_info_msg("network gmchess start");
 
 		    break;
-		case 2:
+		case QUES_RUE:
+		    send_gmchess("network-game-rue");
+		    _global_status.ask = QUES_NO;
+		    _global_status.role = 1;
 		    break;
-		case 3:
+		case QUES_DRAW:
+		    send_gmchess("network-game-draw");
+		    _global_status.ask = QUES_NO;
+		    _global_status.role = 1;
 		    break;
 		};
 
@@ -399,15 +492,21 @@ writing_im_msg_cb(PurpleAccount * account, const char *who, char **buffer,
 		switch (_global_status.ask) {
 		case 0:
 		    break;
-		case 1:
+		case QUES_PLAY:
 		    //answer the start play
 		    init_gm_status();
 		    gtk_info_msg(_("The other side deny the invite"));
 
 		    break;
-		case 2:
+		case QUES_RUE:
+		    send_gmchess("network-game-norue");
+		    _global_status.ask = QUES_NO;
+		    _global_status.role = 1;
 		    break;
-		case 3:
+		case QUES_DRAW:
+		    send_gmchess("network-game-nodraw");
+		    _global_status.ask = QUES_NO;
+		    _global_status.role = 1;
 		    break;
 		};
 
