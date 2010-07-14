@@ -66,10 +66,10 @@ static void init_gm_status()
     _global_status.number = 0;
     _global_status.ask = 0;
     _global_status.respond = 0;
-    if (_global_status.timeout_id) {
-	g_source_remove(_global_status.timeout_id);
-	_global_status.timeout_id = 0;
-    }
+	if (_global_status.timeout_id) {
+		g_source_remove(_global_status.timeout_id);
+		_global_status.timeout_id = 0;
+	}
     _global_status.conv = NULL;
 
 }
@@ -138,92 +138,92 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
     buf[len] = 0;
     gchar *joinstr;
     if (len > 0) {
-	if (_global_status.conv) {
-	    purple_debug(PURPLE_DEBUG_INFO, "plugins",
-		     "gmchess send %s.\n",buf);
-	    gchar *enemy_name = g_strdup_printf("%s",
-						_global_status.conv->
-						active_conv->name);
-	    gchar *my_name = g_strdup_printf("%s",
-					     _global_status.conv->
-					     active_conv->account->
-					     username);
-	    if (strstr(buf, "moves:") != NULL) {
-		_global_status.number++;
-		joinstr =
-		    g_strdup_printf
-		    ("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,%s,enemy_name:%s,my_name:%s}]",
-		     _global_status.id,
-		     _global_status.role,
-		     _global_status.number, buf, enemy_name, my_name);
-		gtk_imhtml_append_text(GTK_IMHTML
-				       (_global_status.conv->entry),
-				       joinstr, FALSE);
-		g_signal_emit_by_name(_global_status.conv->entry,
-				      "message_send");
-		g_free(joinstr);
-	    } else if (strstr(buf, "resign") != NULL) {
-		joinstr =
-		    g_strdup_printf
-		    ("[{game:gmchess,id:%X,action:ask,status:lose,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
-		     _global_status.id,
-		     _global_status.role,
-		     _global_status.number, enemy_name, my_name);
-		gtk_imhtml_append_text(GTK_IMHTML
-				       (_global_status.conv->entry),
-				       joinstr, FALSE);
-		g_signal_emit_by_name(_global_status.conv->entry,
-				      "message_send");
-		g_free(joinstr);
-		init_gm_status();
+		if (_global_status.conv) {
+			purple_debug(PURPLE_DEBUG_INFO, "plugins",
+					"gmchess send %s.\n",buf);
+			gchar *enemy_name = g_strdup_printf("%s",
+					_global_status.conv->
+					active_conv->name);
+			gchar *my_name = g_strdup_printf("%s",
+					_global_status.conv->
+					active_conv->account->
+					username);
+			if (strstr(buf, "moves:") != NULL) {
+				_global_status.number++;
+				joinstr =
+					g_strdup_printf
+					("[{game:gmchess,id:%X,action:working,status:NULL,role:%d,number:%d,%s,enemy_name:%s,my_name:%s}]",
+					 _global_status.id,
+					 _global_status.role,
+					 _global_status.number, buf, enemy_name, my_name);
+				gtk_imhtml_append_text(GTK_IMHTML
+						(_global_status.conv->entry),
+						joinstr, FALSE);
+				g_signal_emit_by_name(_global_status.conv->entry,
+						"message_send");
+				g_free(joinstr);
+			} else if (strstr(buf, "resign") != NULL) {
+				joinstr =
+					g_strdup_printf
+					("[{game:gmchess,id:%X,action:ask,status:lose,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+					 _global_status.id,
+					 _global_status.role,
+					 _global_status.number, enemy_name, my_name);
+				gtk_imhtml_append_text(GTK_IMHTML
+						(_global_status.conv->entry),
+						joinstr, FALSE);
+				g_signal_emit_by_name(_global_status.conv->entry,
+						"message_send");
+				g_free(joinstr);
+				init_gm_status();
 
 
-	    } else if (strstr(buf, "close") != NULL) {
-		joinstr =
-		    g_strdup_printf
-		    ("[{game:gmchess,id:%X,action:ask,status:close,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
-		     _global_status.id,
-		     _global_status.role,
-		     _global_status.number, enemy_name, my_name);
-		gtk_imhtml_append_text(GTK_IMHTML
-				       (_global_status.conv->entry),
-				       joinstr, FALSE);
-		g_signal_emit_by_name(_global_status.conv->entry,
-				      "message_send");
-		g_free(joinstr);
-		init_gm_status();
+			} else if (strstr(buf, "close") != NULL) {
+				joinstr =
+					g_strdup_printf
+					("[{game:gmchess,id:%X,action:ask,status:close,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+					 _global_status.id,
+					 _global_status.role,
+					 _global_status.number, enemy_name, my_name);
+				gtk_imhtml_append_text(GTK_IMHTML
+						(_global_status.conv->entry),
+						joinstr, FALSE);
+				g_signal_emit_by_name(_global_status.conv->entry,
+						"message_send");
+				g_free(joinstr);
+				init_gm_status();
 
-	    } else if (strstr(buf, "rue") != NULL) {
-		joinstr =
-		    g_strdup_printf
-		    ("[{game:gmchess,id:%X,action:ask,status:rue,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
-		     _global_status.id,
-		     _global_status.role,
-		     _global_status.number, enemy_name, my_name);
-		gtk_imhtml_append_text(GTK_IMHTML
-				       (_global_status.conv->entry),
-				       joinstr, FALSE);
-		g_signal_emit_by_name(_global_status.conv->entry,
-				      "message_send");
-		g_free(joinstr);
+			} else if (strstr(buf, "rue") != NULL) {
+				joinstr =
+					g_strdup_printf
+					("[{game:gmchess,id:%X,action:ask,status:rue,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+					 _global_status.id,
+					 _global_status.role,
+					 _global_status.number, enemy_name, my_name);
+				gtk_imhtml_append_text(GTK_IMHTML
+						(_global_status.conv->entry),
+						joinstr, FALSE);
+				g_signal_emit_by_name(_global_status.conv->entry,
+						"message_send");
+				g_free(joinstr);
 
-	    } else if (strstr(buf, "draw") != NULL) {
-		joinstr =
-		    g_strdup_printf
-		    ("[{game:gmchess,id:%X,action:ask,status:draw,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
-		     _global_status.id,
-		     _global_status.role,
-		     _global_status.number, enemy_name, my_name);
-		gtk_imhtml_append_text(GTK_IMHTML
-				       (_global_status.conv->entry),
-				       joinstr, FALSE);
-		g_signal_emit_by_name(_global_status.conv->entry,
-				      "message_send");
-		g_free(joinstr);
-	    }
-	    g_free(enemy_name);
-	    g_free(my_name);
-	}
+			} else if (strstr(buf, "draw") != NULL) {
+				joinstr =
+					g_strdup_printf
+					("[{game:gmchess,id:%X,action:ask,status:draw,role:%d,number:%d,moves:NULL,enemy_name:%s,my_name:%s}]",
+					 _global_status.id,
+					 _global_status.role,
+					 _global_status.number, enemy_name, my_name);
+				gtk_imhtml_append_text(GTK_IMHTML
+						(_global_status.conv->entry),
+						joinstr, FALSE);
+				g_signal_emit_by_name(_global_status.conv->entry,
+						"message_send");
+				g_free(joinstr);
+			}
+			g_free(enemy_name);
+			g_free(my_name);
+		}
 
     }
     return TRUE;
@@ -235,29 +235,26 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 static gboolean check_package(const char *buf)
 {
     if (strstr(buf, "[{game:gmchess,") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",id:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",action:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",status:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",role:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",number:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",moves:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",enemy_name:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, ",my_name:") == NULL)
-	return FALSE;
+		return FALSE;
     if (strstr(buf, "}]") == NULL)
-	return FALSE;
+		return FALSE;
     return TRUE;
-
-
-
 }
 
 static void ok_poune(const char *m)
@@ -554,13 +551,11 @@ static void
 gmchess_button_cb(GtkButton * button, PidginConversation * gtkconv)
 {
 	/** 如果id不为0,则可能在下棋中。退出*/
-    if (_global_status.id != 0) {
+	if (_global_status.id != 0) {
+		gtk_info_msg(_("Please do not repeat invite. "));
+		return;
 
-	gtk_info_msg(_("Please do not repeat invite. "));
-
-	return;
-
-    }
+	}
     //gtk_info_msg("发送邀请中");
     gchar *enemy_name = g_strdup_printf("%s", gtkconv->active_conv->name);
     gchar *my_name =
@@ -629,21 +624,21 @@ static void remove_gmchess_button_pidgin(PidginConversation * gtkconv)
 
     gmchess_button =
 	g_object_get_data(G_OBJECT(gtkconv->toolbar), "gmchess_button");
-    if (gmchess_button != NULL) {
-	gtk_container_remove(GTK_CONTAINER
-			     (gtkconv->toolbar), gmchess_button);
-	g_signal_handlers_disconnect_by_func
-	    (G_OBJECT(gmchess_button),
-	     G_CALLBACK(gmchess_button_cb), gtkconv);
-	gtk_widget_destroy(gmchess_button);
-    }
+	if (gmchess_button != NULL) {
+		gtk_container_remove(GTK_CONTAINER
+				(gtkconv->toolbar), gmchess_button);
+		g_signal_handlers_disconnect_by_func
+			(G_OBJECT(gmchess_button),
+			 G_CALLBACK(gmchess_button_cb), gtkconv);
+		gtk_widget_destroy(gmchess_button);
+	}
 
     separator =
 	g_object_get_data(G_OBJECT(gtkconv->toolbar), "gmchess_separator");
-    if (gmchess_button != NULL) {
-	gtk_container_remove(GTK_CONTAINER(gtkconv->toolbar), separator);
-	gtk_widget_destroy(separator);
-    }
+	if (gmchess_button != NULL) {
+		gtk_container_remove(GTK_CONTAINER(gtkconv->toolbar), separator);
+		gtk_widget_destroy(separator);
+	}
 }
 
 static gboolean plugin_load(PurplePlugin * plugin)
@@ -662,15 +657,15 @@ static gboolean plugin_load(PurplePlugin * plugin)
 			  plugin,
 			  PURPLE_CALLBACK
 			  (remove_gmchess_button_pidgin), NULL);
-    while (convs) {
-	PurpleConversation *conv = (PurpleConversation *) convs->data;
-	/* Setup gmchess button */
-	if (PIDGIN_IS_PIDGIN_CONVERSATION(conv)) {
-	    create_gmchess_button_pidgin(PIDGIN_CONVERSATION(conv));
-	}
+	while (convs) {
+		PurpleConversation *conv = (PurpleConversation *) convs->data;
+		/* Setup gmchess button */
+		if (PIDGIN_IS_PIDGIN_CONVERSATION(conv)) {
+			create_gmchess_button_pidgin(PIDGIN_CONVERSATION(conv));
+		}
 
-	convs = convs->next;
-    }
+		convs = convs->next;
+	}
 
     purple_signal_connect(conv_handle,
 			  "writing-im-msg", plugin,
@@ -681,14 +676,14 @@ static gboolean plugin_load(PurplePlugin * plugin)
     //int fd;
     fd = create_socket();
     if (fd == -1)
-	purple_debug(PURPLE_DEBUG_INFO, "plugins",
+		purple_debug(PURPLE_DEBUG_INFO, "plugins",
 		     "gmchess pidgin bind socket error\n");
-    else {
-	io_channel = g_io_channel_unix_new(fd);
-	g_io_channel_set_encoding(io_channel, NULL, NULL);
-	source_id = g_io_add_watch(io_channel, G_IO_IN, read_socket, &fd);
+	else {
+		io_channel = g_io_channel_unix_new(fd);
+		g_io_channel_set_encoding(io_channel, NULL, NULL);
+		source_id = g_io_add_watch(io_channel, G_IO_IN, read_socket, &fd);
 
-    }
+	}
     init_gm_status();
     return TRUE;
 }
@@ -696,21 +691,21 @@ static gboolean plugin_load(PurplePlugin * plugin)
 static gboolean plugin_unload(PurplePlugin * plugin)
 {
     GList *convs = purple_get_conversations();
-    while (convs) {
-	PurpleConversation *conv = (PurpleConversation *) convs->data;
+	while (convs) {
+		PurpleConversation *conv = (PurpleConversation *) convs->data;
 
-	if (PIDGIN_IS_PIDGIN_CONVERSATION(conv)) {
-	    remove_gmchess_button_pidgin(PIDGIN_CONVERSATION(conv));
+		if (PIDGIN_IS_PIDGIN_CONVERSATION(conv)) {
+			remove_gmchess_button_pidgin(PIDGIN_CONVERSATION(conv));
+		}
+		convs = convs->next;
 	}
-	convs = convs->next;
-    }
     purple_debug(PURPLE_DEBUG_INFO, "plugins",
 		 "gmchess support plugin unloaded.\n");
-    if (fd != -1) {
-	g_source_remove(source_id);
-	g_io_channel_shutdown(io_channel, TRUE, NULL);
-	g_io_channel_unref(io_channel);
-    }
+	if (fd != -1) {
+		g_source_remove(source_id);
+		g_io_channel_shutdown(io_channel, TRUE, NULL);
+		g_io_channel_unref(io_channel);
+	}
     init_gm_status();
 
     return TRUE;
