@@ -42,6 +42,7 @@ class EvMakerApp():
         self.iconview_src.set_item_width(90)
         self.iconview_src.set_text_column(COL_PATH)
         self.iconview_src.set_pixbuf_column(COL_PIXBUF)
+        self.iconview_src.connect("item-activated", self.on_src_item_activated)
         #self.iconview_dst = self.builder.get_object("iconview_dst")
         self.window.show_all()
 
@@ -63,6 +64,10 @@ class EvMakerApp():
         theme = gtk.icon_theme_get_default()
         return theme.load_icon(name,48,0)
 
+    def on_src_item_activated(self,widget, item):
+        model = widget.get_model()
+        path = model[item][COL_PATH]
+        print "click ", path
 
        
 if __name__ == "__main__":
