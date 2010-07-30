@@ -27,7 +27,7 @@ class EvMakerApp():
         self.window.set_title("Easy Video Maker")
         self.window.connect("destroy", gtk.main_quit)
 
-        self.current_dir = "/home/leros/src"
+        self.current_dir = "/home/leros/"
         self.fileIcon = self.get_icon(gtk.STOCK_FILE)
         self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
 
@@ -38,7 +38,8 @@ class EvMakerApp():
         self.iconview_src.set_reorderable(1)
         self.iconview_src.set_selection_mode(gtk.SELECTION_SINGLE)
         self.iconview_src.set_orientation(gtk.ORIENTATION_VERTICAL)
-        #self.iconview_src.set_columns(2)
+        self.iconview_src.set_columns(20)
+        self.iconview_src.set_item_width(90)
         self.iconview_src.set_text_column(COL_PATH)
         self.iconview_src.set_pixbuf_column(COL_PIXBUF)
         #self.iconview_dst = self.builder.get_object("iconview_dst")
