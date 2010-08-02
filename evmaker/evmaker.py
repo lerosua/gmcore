@@ -177,16 +177,16 @@ class EvMakerApp():
         id = self.gmplayer.get_id()
         self.gmplayer.set_size_request(400,300)
         print "----------------------------", id
-        #self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
+        self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
         self.window.show_all()
         self.window.resize(1,1)
-        self.run("mplayer","-osdlevel","3",*args)
+        #self.run("mplayer","-osdlevel","3",*args)
     
     def run(self,program, *args):
         pid = os.fork()
         if not pid:
             os.execvp(program,(program,)+args)
-        return os.wait()[0]
+        #return os.wait()[0]
 
        
 if __name__ == "__main__":
