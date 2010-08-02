@@ -39,6 +39,7 @@ class EvMakerApp():
         self.current_dir = "/home/leros/"
         self.fileIcon = self.get_icon(gtk.STOCK_FILE)
         self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
+        self.playing = 0
 
         self.store_src  = self.create_store_src()
         #self.fill_store()
@@ -151,7 +152,15 @@ class EvMakerApp():
             return
         item = selected[0][0]
         filename = model[item][COL_PATH]
-        self.preview(filename)
+        if self.playing == 0:
+            self.preview(filename)
+            self.playing = 1
+        else:
+            self.playing = 0
+            os.system("killall mplayer")
+            self.preview_ebox.remove(self.gmplayer)
+            self.preview_ebox.add(self.preview_image)
+            self.iconview_src.on_src_item_selection_changed()
         #self.gmplayer.start(filename)
 
     def load_src_file(self, filename):
