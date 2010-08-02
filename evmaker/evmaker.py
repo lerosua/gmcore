@@ -3,6 +3,8 @@
 
 import sys
 import os
+from urllib import quote
+from urllib import unquote
 try:
     import pygtk
     pygtk.require("2.0")
@@ -96,7 +98,8 @@ class EvMakerApp():
         model = widget.get_model()
         path = model[item][COL_PATH]
         print "click ", path
-        os.system("mplayer "+path)
+        #os.system("mplayer "+path)
+        self.run("mplayer",path)
 
     def on_src_item_selection_changed(self, widget):
         model = widget.get_model()
@@ -131,7 +134,7 @@ class EvMakerApp():
 
     def load_src_file(self, filename):
         os.chdir(evhome_dir)
-        print "screenshot "+filename
+        print "screenshot ",filename
         os.system("mplayer -ss 1 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file(video_preview_jpg)
@@ -143,9 +146,17 @@ class EvMakerApp():
 
     def drag_data_src_received(self, widget, context, x, y, selection, targetType, timestamp):
         print "drog receive"
-        filename = [selection.data.strip()]
-        self.load_src_file(filename)
+        filename = selection.data.strip()
+        print "filename ",filename
+        tmp = unquote(filename.strip('[\']'))
+        print tmp
+        self.load_src_file(tmp[7:])
 
+    def run(self,program, *args):
+        pid = os.fork()
+        if not pid:
+            os.execvp(program,(program,)+args)
+        return os.wait()[0]
 
        
 if __name__ == "__main__":
