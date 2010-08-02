@@ -51,10 +51,12 @@
             </child>
             <child>
               <object class="GtkButton" id="button3">
-                <property name="label" translatable="yes">build</property>
+                <property name="label">gtk-media-pause</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <property name="image_position">right</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -126,14 +128,11 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHScale" id="timeline">
+          <object class="GtkHSeparator" id="hseparator2">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="value_pos">bottom</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
             <property name="position">3</property>
           </packing>
         </child>
@@ -154,32 +153,40 @@
                   <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="vbox1">
+                  <object class="GtkVBox" id="vbox_view">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkImage" id="image_view">
+                      <object class="GtkEventBox" id="event_preview">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-missing-image</property>
+                        <child>
+                          <object class="GtkImage" id="image_view">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-missing-image</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHSeparator" id="hseparator2">
+                      <object class="GtkHScale" id="timeline">
                         <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="draw_value">False</property>
+                        <property name="value_pos">bottom</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkHButtonBox" id="hbuttonbox1">
                         <property name="visible">True</property>
+                        <property name="homogeneous">True</property>
                         <property name="layout_style">center</property>
                         <child>
                           <object class="GtkButton" id="button1">
@@ -223,7 +230,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <child>
-                              <object class="GtkImage" id="image4">
+                              <object class="GtkImage" id="image1">
                                 <property name="visible">True</property>
                                 <property name="icon_name">media-playback-start</property>
                               </object>
@@ -277,6 +284,9 @@
                         <property name="fill">False</property>
                         <property name="position">2</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>

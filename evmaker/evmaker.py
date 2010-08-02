@@ -16,6 +16,7 @@ try:
 except:
     sys.exit(1)
 
+#import gmplayer
 
 COL_NAME = 0
 COL_PIXBUF = 1
@@ -70,13 +71,21 @@ class EvMakerApp():
         self.bt_load.connect("clicked", self.on_bt_load_clicked)
 
 
-        self.preview_widget = self.builder.get_object("image_view")
+        self.preview_image = self.builder.get_object("image_view")
         self.bt_play = self.builder.get_object("bt_play")
         self.bt_play.connect("clicked", self.on_bt_play_clicked)
 
 
+        #for preview window
+        self.preview_ebox = self.builder.get_object("event_preview")
+        #self.gmplayer = gmplayer.GMplayer()
+        self.gmplayer = gtk.Socket()
+        self.gmplayer.show()
+        #self.preview_ebox.pack_start(self.gmplayer)
+        
 
         self.window.show_all()
+        #self.gmplayer.hide()
 
 
     def create_store_src(self):
@@ -111,7 +120,7 @@ class EvMakerApp():
             return
         item = selected[0][0]
         icon = model[item][COL_PIXBUF_BIG]
-        self.preview_widget.set_from_pixbuf(icon)
+        self.preview_image.set_from_pixbuf(icon)
         print model[item][COL_PATH]
 
 
@@ -143,6 +152,7 @@ class EvMakerApp():
         item = selected[0][0]
         filename = model[item][COL_PATH]
         self.preview(filename)
+        #self.gmplayer.start(filename)
 
     def load_src_file(self, filename):
         os.chdir(evhome_dir)
@@ -162,6 +172,14 @@ class EvMakerApp():
         self.load_src_file(tmp[7:])
 
     def preview(self,*args):
+        self.preview_ebox.remove(self.preview_image)
+        self.preview_ebox.add(self.gmplayer)
+        id = self.gmplayer.get_id()
+        self.gmplayer.set_size_request(400,300)
+        print "----------------------------", id
+        #self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
+        self.window.show_all()
+        self.window.resize(1,1)
         self.run("mplayer","-osdlevel","3",*args)
     
     def run(self,program, *args):
