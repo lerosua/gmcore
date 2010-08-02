@@ -71,6 +71,8 @@ class EvMakerApp():
 
 
         self.preview_widget = self.builder.get_object("image_view")
+        self.bt_play = self.builder.get_object("bt_play")
+        self.bt_play.connect("clicked", self.on_bt_play_clicked)
 
 
 
@@ -99,7 +101,8 @@ class EvMakerApp():
         path = model[item][COL_PATH]
         print "click ", path
         #os.system("mplayer "+path)
-        self.run("mplayer",path)
+        #self.run("mplayer",path)
+        self.preview(path)
 
     def on_src_item_selection_changed(self, widget):
         model = widget.get_model()
@@ -132,10 +135,18 @@ class EvMakerApp():
             self.load_src_file(fn_widget.get_filename())
         fn_widget.destroy()
 
+    def on_bt_play_clicked(self, widget):
+        model = self.iconview_src.get_model()
+        selected = self.iconview_src.get_selected_items()
+        if len(selected) == 0:
+            return
+        item = selected[0][0]
+        filename = model[item][COL_PATH]
+        self.preview(filename)
+
     def load_src_file(self, filename):
         os.chdir(evhome_dir)
-        print "screenshot ",filename
-        os.system("mplayer -ss 1 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
+        os.system("mplayer -ss 90 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file(video_preview_jpg)
         name = os.path.basename(filename)
@@ -147,11 +158,12 @@ class EvMakerApp():
     def drag_data_src_received(self, widget, context, x, y, selection, targetType, timestamp):
         print "drog receive"
         filename = selection.data.strip()
-        print "filename ",filename
         tmp = unquote(filename.strip('[\']'))
-        print tmp
         self.load_src_file(tmp[7:])
 
+    def preview(self,*args):
+        self.run("mplayer","-osdlevel","3",*args)
+    
     def run(self,program, *args):
         pid = os.fork()
         if not pid:
