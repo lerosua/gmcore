@@ -70,6 +70,12 @@ class EvMakerApp():
         self.bt_open.connect("clicked", self.on_bt_open_clicked)
         self.bt_load = self.builder.get_object("bt_load")
         self.bt_load.connect("clicked", self.on_bt_load_clicked)
+        self.bt_cut = self.builder.get_object("bt_cut")
+        self.bt_cut.connect("clicked", self.on_bt_cut_clicked)
+        self.bt_delete = self.builder.get_object("bt_delete")
+        self.bt_delete.connect("clicked", self.on_bt_delete_clicked)
+        self.bt_quit  = self.builder.get_object("bt_quit")
+        self.bt_quit.connect("clicked",self.on_bt_quit_clicked)
 
 
         self.preview_image = self.builder.get_object("image_view")
@@ -109,9 +115,6 @@ class EvMakerApp():
     def on_src_item_activated(self,widget, item):
         model = widget.get_model()
         path = model[item][COL_PATH]
-        print "click ", path
-        #os.system("mplayer "+path)
-        #self.run("mplayer",path)
         self.preview(path)
 
     def on_src_item_selection_changed(self, widget):
@@ -130,7 +133,6 @@ class EvMakerApp():
         print "open clicked"
 
     def on_bt_load_clicked(self, widget):
-        print "load clicked"
         fn_widget = gtk.FileChooserDialog("Select a Video File",None,gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN,gtk.RESPONSE_OK))
         fn_widget.set_local_only(True)
         fn_filter = gtk.FileFilter()
@@ -145,6 +147,16 @@ class EvMakerApp():
             self.load_src_file(fn_widget.get_filename())
         fn_widget.destroy()
 
+    def on_bt_cut_clicked(self,widget):
+        print "test"
+    
+    def on_bt_delete_clicked(self,widget):
+        print "test"
+
+
+    def on_bt_quit_clicked(self,widget):
+        gtk.main_quit()
+
     def on_bt_play_clicked(self, widget):
         model = self.iconview_src.get_model()
         selected = self.iconview_src.get_selected_items()
@@ -152,22 +164,14 @@ class EvMakerApp():
             return
         item = selected[0][0]
         filename = model[item][COL_PATH]
-        if self.playing == 0:
-            self.preview(filename)
-            self.playing = 1
-        else:
-            self.playing = 0
-            os.system("killall mplayer")
-            self.preview_ebox.remove(self.gmplayer)
-            self.preview_ebox.add(self.preview_image)
-            self.iconview_src.on_src_item_selection_changed()
-        #self.gmplayer.start(filename)
-
+        self.preview(filename)
+        
     def load_src_file(self, filename):
         os.chdir(evhome_dir)
         os.system("mplayer -ss 90 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,96,96)
-        tmpicon_preview = gtk.gdk.pixbuf_new_from_file(video_preview_jpg)
+        tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,400,300)
+        #tmpicon_preview = gtk.gdk.pixbuf_new_from_file(video_preview_jpg)
         name = os.path.basename(filename)
         self.store_src.append([name,tmpicon,filename,tmpicon_preview])
 
@@ -175,21 +179,25 @@ class EvMakerApp():
         print "drag get"
 
     def drag_data_src_received(self, widget, context, x, y, selection, targetType, timestamp):
-        print "drog receive"
         filename = selection.data.strip()
         tmp = unquote(filename.strip('[\']'))
         self.load_src_file(tmp[7:])
 
     def preview(self,*args):
-        self.preview_ebox.remove(self.preview_image)
-        self.preview_ebox.add(self.gmplayer)
-        id = self.gmplayer.get_id()
-        self.gmplayer.set_size_request(400,300)
-        print "----------------------------", id
-        self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
-        self.window.show_all()
-        self.window.resize(1,1)
-        #self.run("mplayer","-osdlevel","3",*args)
+        if self.playing == 0:
+            self.preview_ebox.remove(self.preview_image)
+            self.preview_ebox.add(self.gmplayer)
+            id = self.gmplayer.get_id()
+            self.gmplayer.set_size_request(400,300)
+            self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
+            self.window.show_all()
+            self.playing = 1
+        else:
+            self.playing = 0
+            os.system("killall mplayer")
+            self.preview_ebox.remove(self.gmplayer)
+            self.preview_ebox.add(self.preview_image)
+            self.iconview_src.on_src_item_selection_changed()
     
     def run(self,program, *args):
         pid = os.fork()
