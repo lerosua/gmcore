@@ -40,8 +40,9 @@ class EvMakerApp():
         self.fileIcon = self.get_icon(gtk.STOCK_FILE)
         self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
         self.playing = 0
+        self.file_num = 1
 
-        self.store_src  = self.create_store_src()
+        self.store_src  = self.create_store()
         #self.fill_store()
         #iconview_src put the source of video
         self.iconview_src = self.builder.get_object("iconview_src")
@@ -63,7 +64,21 @@ class EvMakerApp():
         self.all_vbox = self.builder.get_object("all_vbox")
         self.all_vbox.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
         self.all_vbox.connect("drag_data_received", self.drag_data_src_received)
-        #self.iconview_dst = self.builder.get_object("iconview_dst")
+
+        #self.iconview_src.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
+        #self.iconview_src.connect("drag_data_received", self.drag_data_src_received)
+
+        self.iconview_dst = self.builder.get_object("iconview_dst")
+        self.store_dst = self.create_store()
+        self.iconview_dst.set_model(self.store_dst)
+        self.iconview_dst.set_reorderable(1)
+        self.iconview_dst.set_selection_mode(gtk.SELECTION_SINGLE)
+        self.iconview_dst.set_orientation(gtk.ORIENTATION_VERTICAL)
+        self.iconview_dst.set_columns(20)
+        self.iconview_dst.set_item_width(90)
+        self.iconview_dst.set_text_column(COL_NAME)
+        self.iconview_dst.set_pixbuf_column(COL_PIXBUF)
+        self.iconview_dst.connect("item-activated", self.on_src_item_activated)
 
         # tool buttons
         self.bt_open = self.builder.get_object("bt_open")
@@ -76,6 +91,9 @@ class EvMakerApp():
         self.bt_delete.connect("clicked", self.on_bt_delete_clicked)
         self.bt_quit  = self.builder.get_object("bt_quit")
         self.bt_quit.connect("clicked",self.on_bt_quit_clicked)
+        self.bt_split = self.builder.get_object("bt_split")
+        self.bt_split.connect("clicked", self.on_bt_split_clicked)
+
 
 
         self.preview_image = self.builder.get_object("image_view")
@@ -95,7 +113,7 @@ class EvMakerApp():
         #self.gmplayer.hide()
 
 
-    def create_store_src(self):
+    def create_store(self):
         store = gtk.ListStore(str,gtk.gdk.Pixbuf,str,gtk.gdk.Pixbuf)
         return store
         
@@ -157,6 +175,32 @@ class EvMakerApp():
     def on_bt_quit_clicked(self,widget):
         gtk.main_quit()
 
+    def on_bt_split_clicked(self, widget):
+        model = self.iconview_src.get_model()
+        selected = self.iconview_src.get_selected_items()
+        if len(selected) == 0:
+            return
+        item = selected[0][0]
+        filename = model[item][COL_PATH]
+
+        start_t_h = self.builder.get_object("start_t_h").get_text()
+        start_t_m = self.builder.get_object("start_t_m").get_text()
+        start_t_s = self.builder.get_object("start_t_s").get_text()
+        end_t_h = self.builder.get_object("end_t_h").get_text()
+        end_t_m = self.builder.get_object("end_t_m").get_text()
+        end_t_s = self.builder.get_object("end_t_s").get_text()
+        outfile = "outfile"+str(self.file_num)+".avi"
+        cmd = "mencoder"+" -ss "+start_t_h+":"+start_t_m+":"+start_t_s+" -endpos "+end_t_h+":"+end_t_m+":"+end_t_s+" -ovc copy -oac copy "+filename+" -o "+outfile
+        self.file_num += 1
+        print cmd
+        print self.file_num
+        #progress = self.builder.get_object("progressbar_split")
+        #progress.pulse()
+        #os.system(cmd)
+        self.wait_run(cmd)
+        self.load_dst_file(outfile)
+
+
     def on_bt_play_clicked(self, widget):
         model = self.iconview_src.get_model()
         selected = self.iconview_src.get_selected_items()
@@ -171,9 +215,17 @@ class EvMakerApp():
         os.system("mplayer -ss 90 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,400,300)
-        #tmpicon_preview = gtk.gdk.pixbuf_new_from_file(video_preview_jpg)
         name = os.path.basename(filename)
         self.store_src.append([name,tmpicon,filename,tmpicon_preview])
+
+    def load_dst_file(self, filename):
+        os.chdir(evhome_dir)
+        os.system("mplayer -ss 90 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
+        tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,96,96)
+        tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,400,300)
+        name = os.path.basename(filename)
+        self.store_dst.append([name,tmpicon,filename,tmpicon_preview])
+
 
     def drag_data_src_get(self,widget, context, selection_data, info, timestamp):
         print "drag get"
@@ -185,25 +237,35 @@ class EvMakerApp():
 
     def preview(self,*args):
         if self.playing == 0:
-            self.preview_ebox.remove(self.preview_image)
-            self.preview_ebox.add(self.gmplayer)
-            id = self.gmplayer.get_id()
-            self.gmplayer.set_size_request(400,300)
-            self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
-            self.window.show_all()
+            #self.preview_ebox.remove(self.preview_image)
+            #self.preview_ebox.add(self.gmplayer)
+            #id = self.gmplayer.get_id()
+            #self.gmplayer.set_size_request(400,300)
+            self.run("mplayer","-osdlevel","3",*args)
+            #self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
+            #self.window.show_all()
             self.playing = 1
         else:
             self.playing = 0
-            os.system("killall mplayer")
-            self.preview_ebox.remove(self.gmplayer)
-            self.preview_ebox.add(self.preview_image)
-            self.iconview_src.on_src_item_selection_changed()
+            #os.system("killall mplayer")
+            #self.preview_ebox.remove(self.gmplayer)
+            #self.preview_ebox.add(self.preview_image)
+            #self.iconview_src.on_src_item_selection_changed()
     
     def run(self,program, *args):
         pid = os.fork()
         if not pid:
             os.execvp(program,(program,)+args)
         #return os.wait()[0]
+
+    def wait_run(self,cmd):
+        pid = os.fork()
+        if not pid:
+            os.system(cmd)
+            sys.exit(0)
+        return os.wait()[0]
+
+
 
        
 if __name__ == "__main__":
