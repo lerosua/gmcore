@@ -25,6 +25,7 @@ COL_PIXBUF_BIG = 3
 
 evhome_dir = "/tmp"
 video_preview_jpg = "/tmp/00000001.jpg"
+app_jpg = "evmaker.jpg"
 
 class EvMakerApp():
     def __init__(self):
@@ -93,10 +94,14 @@ class EvMakerApp():
         self.bt_quit.connect("clicked",self.on_bt_quit_clicked)
         self.bt_split = self.builder.get_object("bt_split")
         self.bt_split.connect("clicked", self.on_bt_split_clicked)
+        self.bt_merge = self.builder.get_object("bt_merge")
+        self.bt_merge.connect("clicked", self.on_bt_merge_clicked)
 
 
 
         self.preview_image = self.builder.get_object("image_view")
+        pix = gtk.gdk.pixbuf_new_from_file_at_size(app_jpg,300,200)
+        self.preview_image.set_from_pixbuf(pix)
         self.bt_play = self.builder.get_object("bt_play")
         self.bt_play.connect("clicked", self.on_bt_play_clicked)
 
@@ -136,6 +141,7 @@ class EvMakerApp():
         self.preview(path)
 
     def on_src_item_selection_changed(self, widget):
+        iconview_dst.unselect_all()
         model = widget.get_model()
         selected = widget.get_selected_items()
         if len(selected) == 0:
@@ -170,6 +176,15 @@ class EvMakerApp():
     
     def on_bt_delete_clicked(self,widget):
         print "test"
+        model = self.iconview_src.get_model()
+        selected = self.iconview_src.get_selected_items()
+        if len(selected) == 0:
+            return
+        item = selected[0][0]
+        iter = model.get_iter(item)
+        model.remove(iter)
+        #pix = gtk.gdk.pixbuf_new_from_file(app_jpg)
+        #self.preview_image.set_from_pixbuf(pix)
 
 
     def on_bt_quit_clicked(self,widget):
@@ -194,12 +209,21 @@ class EvMakerApp():
         self.file_num += 1
         print cmd
         print self.file_num
-        #progress = self.builder.get_object("progressbar_split")
-        #progress.pulse()
-        #os.system(cmd)
         self.wait_run(cmd)
         self.load_dst_file(outfile)
 
+    def on_bt_merge_clicked(self,widget):
+        model = self.iconview_dst.get_model()
+        iter = model.get_iter_first()
+        filename = ""
+        while ( iter != None ):
+            row = model.get_path(iter)
+            filename += " "
+            filename += model[row][COL_PATH]
+            iter = model.iter_next(iter)
+        cmd = "mencoder -ovc copy -oac copy "+filename+" -o /tmp/out.avi"
+        print cmd
+        self.wait_run(cmd)
 
     def on_bt_play_clicked(self, widget):
         model = self.iconview_src.get_model()
