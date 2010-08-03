@@ -141,7 +141,7 @@ class EvMakerApp():
         self.preview(path)
 
     def on_src_item_selection_changed(self, widget):
-        iconview_dst.unselect_all()
+        self.iconview_dst.unselect_all()
         model = widget.get_model()
         selected = widget.get_selected_items()
         if len(selected) == 0:
