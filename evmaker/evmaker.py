@@ -3,20 +3,14 @@
 
 import sys
 import os
+import pygtk
+pygtk.require("2.0")
+import gtk
 from urllib import quote
 from urllib import unquote
-try:
-    import pygtk
-    pygtk.require("2.0")
-except:
-    pass
+from markscale import MarkScale
+from player import player
 
-try:
-    import gtk
-except:
-    sys.exit(1)
-
-#import gmplayer
 
 COL_NAME = 0
 COL_PIXBUF = 1
@@ -40,7 +34,7 @@ class EvMakerApp():
         self.current_dir = "/home/leros/"
         self.fileIcon = self.get_icon(gtk.STOCK_FILE)
         self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
-        self.playing = 0
+        self.player = player()
         self.file_num = 1
 
         self.store_src  = self.create_store()
@@ -81,13 +75,19 @@ class EvMakerApp():
         self.iconview_dst.set_pixbuf_column(COL_PIXBUF)
         self.iconview_dst.connect("item-activated", self.on_src_item_activated)
 
+        #for timeline
+        adj = gtk.Adjustment(0.0,0.0,100.0,0.1,1.0,1.0)
+        self.timeline = MarkScale(adj)
+        vbox_timeline = self.builder.get_object("vbox_timeline")
+        self.timeline.set_draw_value(False)
+        vbox_timeline.pack_start(self.timeline,False, False)
         # tool buttons
         self.bt_open = self.builder.get_object("bt_open")
         self.bt_open.connect("clicked", self.on_bt_open_clicked)
         self.bt_load = self.builder.get_object("bt_load")
         self.bt_load.connect("clicked", self.on_bt_load_clicked)
-        self.bt_cut = self.builder.get_object("bt_cut")
-        self.bt_cut.connect("clicked", self.on_bt_cut_clicked)
+        #self.bt_cut = self.builder.get_object("bt_cut")
+        #self.bt_cut.connect("clicked", self.on_bt_cut_clicked)
         self.bt_delete = self.builder.get_object("bt_delete")
         self.bt_delete.connect("clicked", self.on_bt_delete_clicked)
         self.bt_quit  = self.builder.get_object("bt_quit")
@@ -107,11 +107,9 @@ class EvMakerApp():
 
 
         #for preview window
-        self.preview_ebox = self.builder.get_object("event_preview")
-        #self.gmplayer = gmplayer.GMplayer()
-        self.gmplayer = gtk.Socket()
-        self.gmplayer.show()
-        #self.preview_ebox.pack_start(self.gmplayer)
+        #self.preview_ebox = self.builder.get_object("event_preview")
+        #self.gmplayer = gtk.Socket()
+        #self.gmplayer.show()
         
 
         self.window.show_all()
@@ -138,7 +136,7 @@ class EvMakerApp():
     def on_src_item_activated(self,widget, item):
         model = widget.get_model()
         path = model[item][COL_PATH]
-        self.preview(path)
+        self.player.preview(path)
 
     def on_src_item_selection_changed(self, widget):
         self.iconview_dst.unselect_all()
@@ -175,7 +173,6 @@ class EvMakerApp():
         print "test"
     
     def on_bt_delete_clicked(self,widget):
-        print "test"
         model = self.iconview_src.get_model()
         selected = self.iconview_src.get_selected_items()
         if len(selected) == 0:
@@ -232,21 +229,19 @@ class EvMakerApp():
             return
         item = selected[0][0]
         filename = model[item][COL_PATH]
-        self.preview(filename)
+        self.player.preview(filename)
         
     def load_src_file(self, filename):
-        os.chdir(evhome_dir)
-        os.system("mplayer -ss 90 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
-        tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,96,96)
-        tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,400,300)
+        jpg = self.player.get_screenshot(filename)
+        tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(jpg,96,96)
+        tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(jpg,400,300)
         name = os.path.basename(filename)
         self.store_src.append([name,tmpicon,filename,tmpicon_preview])
 
     def load_dst_file(self, filename):
-        os.chdir(evhome_dir)
-        os.system("mplayer -ss 90 -noframedrop -nosound -vo jpeg -frames 1 "+filename)
-        tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,96,96)
-        tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(video_preview_jpg,400,300)
+        jpg = self.player.get_screenshot(filename)
+        tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(jpg,96,96)
+        tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(jpg,400,300)
         name = os.path.basename(filename)
         self.store_dst.append([name,tmpicon,filename,tmpicon_preview])
 
@@ -259,23 +254,6 @@ class EvMakerApp():
         tmp = unquote(filename.strip('[\']'))
         self.load_src_file(tmp[7:])
 
-    def preview(self,*args):
-        if self.playing == 0:
-            #self.preview_ebox.remove(self.preview_image)
-            #self.preview_ebox.add(self.gmplayer)
-            #id = self.gmplayer.get_id()
-            #self.gmplayer.set_size_request(400,300)
-            self.run("mplayer","-osdlevel","3",*args)
-            #self.run("mplayer","-slave","-osdlevel","3","-wid",str(id),*args)
-            #self.window.show_all()
-            self.playing = 1
-        else:
-            self.playing = 0
-            #os.system("killall mplayer")
-            #self.preview_ebox.remove(self.gmplayer)
-            #self.preview_ebox.add(self.preview_image)
-            #self.iconview_src.on_src_item_selection_changed()
-    
     def run(self,program, *args):
         pid = os.fork()
         if not pid:
