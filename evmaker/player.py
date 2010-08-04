@@ -9,7 +9,7 @@ preview_jpg_filename = "/tmp/00000001.jpg"
 
 class player():
     def get_length(self,filename):
-        cmd='mplayer -indentify -frames 0 2>/dev/null '+filename
+        cmd='mplayer -identify -frames 0 2>/dev/null '+filename
         out = os.popen(cmd)
         for line in out:
             line = line.strip()

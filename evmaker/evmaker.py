@@ -16,6 +16,7 @@ COL_NAME = 0
 COL_PIXBUF = 1
 COL_PATH = 2
 COL_PIXBUF_BIG = 3
+COL_LENGTH = 4
 
 evhome_dir = "/tmp"
 video_preview_jpg = "/tmp/00000001.jpg"
@@ -106,29 +107,14 @@ class EvMakerApp():
         self.bt_play.connect("clicked", self.on_bt_play_clicked)
 
 
-        #for preview window
-        #self.preview_ebox = self.builder.get_object("event_preview")
-        #self.gmplayer = gtk.Socket()
-        #self.gmplayer.show()
-        
-
         self.window.show_all()
-        #self.gmplayer.hide()
 
 
     def create_store(self):
-        store = gtk.ListStore(str,gtk.gdk.Pixbuf,str,gtk.gdk.Pixbuf)
+        # filename, preview jpg, filepath, big jpg, file length
+        store = gtk.ListStore(str, gtk.gdk.Pixbuf, str, gtk.gdk.Pixbuf, str)
         return store
         
-    def fill_store(self):
-        self.store_src.clear()
-        for fl in os.listdir(self.current_dir):
-            if not fl[0] == '.':
-                if os.path.isdir(os.path.join(self.current_dir,fl)):
-                    self.store_src.append([fl,self.dirIcon,fl,self.dirIcon])
-                else:
-                    self.store_src.append([fl,self.fileIcon,fl,self.fileIcon])
-
     def get_icon(self,name):
         theme = gtk.icon_theme_get_default()
         return theme.load_icon(name,48,0)
@@ -147,7 +133,12 @@ class EvMakerApp():
         item = selected[0][0]
         icon = model[item][COL_PIXBUF_BIG]
         self.preview_image.set_from_pixbuf(icon)
+        length = model[item][COL_LENGTH]
+        self.timeline.setNbFrames(float(length))
+        self.timeline.setA(10)
+        self.timeline.setA(90)
         print model[item][COL_PATH]
+        print length
 
 
 
@@ -233,17 +224,19 @@ class EvMakerApp():
         
     def load_src_file(self, filename):
         jpg = self.player.get_screenshot(filename)
+        length = self.player.get_length(filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(jpg,400,300)
         name = os.path.basename(filename)
-        self.store_src.append([name,tmpicon,filename,tmpicon_preview])
+        self.store_src.append([name,tmpicon,filename,tmpicon_preview, length])
 
     def load_dst_file(self, filename):
         jpg = self.player.get_screenshot(filename)
+        length = self.player.get_length(filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(jpg,400,300)
         name = os.path.basename(filename)
-        self.store_dst.append([name,tmpicon,filename,tmpicon_preview])
+        self.store_dst.append([name,tmpicon,filename,tmpicon_preview, length])
 
 
     def drag_data_src_get(self,widget, context, selection_data, info, timestamp):

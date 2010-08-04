@@ -7,6 +7,7 @@ class MarkScale(gtk.HScale):
 
     def __init__(self, adj):
         gtk.HScale.__init__(self,adj)
+        self.adj = adj
 
         self.set_events(gtk.gdk.EXPOSURE_MASK)
         self.markA=0
@@ -18,6 +19,7 @@ class MarkScale(gtk.HScale):
 
     def setNbFrames(self,total):
         self.nbFrames = total
+        #self.adj.set_upper(total)
 
     def setA(self, a):
         self.markA=a
