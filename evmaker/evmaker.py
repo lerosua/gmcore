@@ -90,6 +90,9 @@ class EvMakerApp():
         self.builder.get_object("bt_split").connect("clicked", self.on_bt_split_clicked)
         self.builder.get_object("bt_merge").connect("clicked", self.on_bt_merge_clicked)
 
+        self.label_A = self.builder.get_object("label_A_time")
+        self.label_B = self.builder.get_object("label_B_time")
+
 
 
         self.preview_image = self.builder.get_object("image_view")
@@ -128,8 +131,8 @@ class EvMakerApp():
         icon = model[item][COL_PIXBUF_BIG]
         self.preview_image.set_from_pixbuf(icon)
         length = model[item][COL_LENGTH]
-        #self.timeline.setNbFrames(float(length))
-        self.timeline.setNbFrames(float(100))
+        self.timeline.setNbFrames(float(length))
+        #self.timeline.setNbFrames(float(100))
         print model[item][COL_PATH]
         print length
 
@@ -179,14 +182,10 @@ class EvMakerApp():
         item = selected[0][0]
         filename = model[item][COL_PATH]
 
-        start_t_h = self.builder.get_object("start_t_h").get_text()
-        start_t_m = self.builder.get_object("start_t_m").get_text()
-        start_t_s = self.builder.get_object("start_t_s").get_text()
-        end_t_h = self.builder.get_object("end_t_h").get_text()
-        end_t_m = self.builder.get_object("end_t_m").get_text()
-        end_t_s = self.builder.get_object("end_t_s").get_text()
+        a_time = self.label_A.get_text()
+        b_time = self.time_to_string(self.timeline.getB() - self.timeline.getA())
         outfile = "outfile"+str(self.file_num)+".avi"
-        cmd = "mencoder"+" -ss "+start_t_h+":"+start_t_m+":"+start_t_s+" -endpos "+end_t_h+":"+end_t_m+":"+end_t_s+" -ovc copy -oac copy "+filename+" -o "+outfile
+        cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac copy "+filename+" -o "+outfile
         self.file_num += 1
         print cmd
         print self.file_num
@@ -213,16 +212,22 @@ class EvMakerApp():
             return
         item = selected[0][0]
         filename = model[item][COL_PATH]
-        self.player.preview(filename)
+        a_time = self.label_A.get_text()
+        b_time = self.time_to_string(self.timeline.getB() - self.timeline.getA())
+        self.player.preview(filename,a_time,b_time)
         
     def on_bt_a_clicked(self, widget):
         val = self.timeline.get_value()
-        self.timeline.setA(int(val))
-        print val
+        self.timeline.setA(float('%.2f'%val))
+        a = self.timeline.getA()
+        self.label_A.set_text(self.time_to_string(a))
+
     def on_bt_b_clicked(self, widget):
         val = self.timeline.get_value()
-        self.timeline.setB(int(val))
-        print val
+        self.timeline.setB(float('%.2f'%val))
+        b = self.timeline.getB()
+        self.label_B.set_text(self.time_to_string(b))
+
     def load_src_file(self, filename):
         jpg = self.player.get_screenshot(filename)
         length = self.player.get_length(filename)
@@ -261,6 +266,17 @@ class EvMakerApp():
             sys.exit(0)
         return os.wait()[0]
 
+    def time_to_string(self,value):
+        """
+        Converts the given time in nanoseconds to a human readable string
+    
+        Format HH:MM:SS
+        """
+        mins = value / 60
+        sec = value % 60
+        hours = mins / 60
+        mins = mins % 60
+        return "%02d:%02d:%02d" % (hours, mins, sec)
 
 
        

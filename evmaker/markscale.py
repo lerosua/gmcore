@@ -13,14 +13,14 @@ class MarkScale(gtk.HScale):
         self.markA=0
         self.markB=100
         self.nbFrames=100
+        self.total =0
 
         self.connect("expose-event",self.expose)
         self.connect("realize", self.realize)
 
 
     def setNbFrames(self,total):
-        self.nbFrames = total
-        #self.adj.set_upper(total)
+        self.total = total
 
     def setA(self, a):
         self.markA=a
@@ -35,6 +35,17 @@ class MarkScale(gtk.HScale):
         event = gtk.gdk.Event(gtk.gdk.EXPOSE)
         self.emit("expose-event", event)
 
+    def getA(self):
+        a = (self.total*self.markA)/100
+        print 'a = ',a, '  markA = ',self.markA
+        #return '%.2f'%a
+        return int(a)
+    def getB(self):
+        b = (self.total*(self.markB+1.00))/100
+        print 'b = ',b, '   markB = ',self.markB
+        #return '%.2f'%b
+        return int(b)
+
     def realize(self, widget):
         widget.set_size_request(widget.allocation.width,widget.allocation.height+10)
 
@@ -42,8 +53,8 @@ class MarkScale(gtk.HScale):
         if self.nbFrames > 1 :
             gc = widget.window.new_gc()
             width = self.allocation.width
-            start = self.allocation.x + (width-1)*(self.markA*1.0/(self.nbFrames-1))
-            end   = self.allocation.x + (width-1)*(self.markB*1.0/(self.nbFrames-1))
+            start = self.allocation.x +int( (width-1)*(self.markA/(self.nbFrames-1)))
+            end   = self.allocation.x + int( (width-1)*(self.markB/(self.nbFrames-1)))
             top   = self.allocation.y + 1;
             bottom = self.allocation.y + self.allocation.height - 2
 

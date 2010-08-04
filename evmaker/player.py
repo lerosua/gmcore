@@ -3,6 +3,7 @@
 
 import os
 import re
+import sys
 
 tmp_dir="/tmp/"
 preview_jpg_filename = "/tmp/00000001.jpg"
@@ -20,14 +21,22 @@ class player():
     def get_screenshot(self,filename):
         os.chdir(tmp_dir)
         cmd  = "mplayer -ss 90 -noframedrop -nosound -vo jpeg -frames 1 2>/dev/null "+filename
-        out = os.popen(cmd)
+        #out = os.popen(cmd)
+        self.wait_run(cmd)
         return preview_jpg_filename
 
 
-    def preview(self,*args):
-        self.run("mplayer","-osdlevel","3",*args)
+    def preview(self,filename,a_time,b_time):
+        self.run("mplayer","-osdlevel","3","-ss",a_time,"-endpos",b_time,filename)
 
     def run(self,program, *args):
         pid = os.fork()
         if not pid:
             os.execvp(program,(program,)+args)
+
+    def wait_run(self,cmd):
+        pid = os.fork()
+        if not pid:
+            os.system(cmd)
+            sys.exit(0)
+        return os.wait()[0]

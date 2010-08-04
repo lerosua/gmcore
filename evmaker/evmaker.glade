@@ -146,7 +146,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="hscrollbar_policy">automatic</property>
-            <property name="vscrollbar_policy">never</property>
+            <property name="vscrollbar_policy">automatic</property>
             <child>
               <object class="GtkIconView" id="iconview_src">
                 <property name="visible">True</property>
@@ -259,7 +259,7 @@
                             <child>
                               <object class="GtkImage" id="image5">
                                 <property name="visible">True</property>
-                                <property name="icon_name">media-seek-backward</property>
+                                <property name="icon_name">media-seek-forward</property>
                               </object>
                             </child>
                           </object>
@@ -437,7 +437,7 @@
                         <child>
                           <object class="GtkLabel" id="label_A_time">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">000000</property>
+                            <property name="label" translatable="yes">00:00:00</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -469,7 +469,7 @@
                         <child>
                           <object class="GtkLabel" id="label_B_time">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">000000</property>
+                            <property name="label" translatable="yes">00:00:00</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
