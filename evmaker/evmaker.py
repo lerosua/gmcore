@@ -83,28 +83,22 @@ class EvMakerApp():
         self.timeline.set_draw_value(False)
         vbox_timeline.pack_start(self.timeline,False, False)
         # tool buttons
-        self.bt_open = self.builder.get_object("bt_open")
-        self.bt_open.connect("clicked", self.on_bt_open_clicked)
-        self.bt_load = self.builder.get_object("bt_load")
-        self.bt_load.connect("clicked", self.on_bt_load_clicked)
-        #self.bt_cut = self.builder.get_object("bt_cut")
-        #self.bt_cut.connect("clicked", self.on_bt_cut_clicked)
-        self.bt_delete = self.builder.get_object("bt_delete")
-        self.bt_delete.connect("clicked", self.on_bt_delete_clicked)
-        self.bt_quit  = self.builder.get_object("bt_quit")
-        self.bt_quit.connect("clicked",self.on_bt_quit_clicked)
-        self.bt_split = self.builder.get_object("bt_split")
-        self.bt_split.connect("clicked", self.on_bt_split_clicked)
-        self.bt_merge = self.builder.get_object("bt_merge")
-        self.bt_merge.connect("clicked", self.on_bt_merge_clicked)
+        self.builder.get_object("bt_open").connect("clicked", self.on_bt_open_clicked)
+        self.builder.get_object("bt_load").connect("clicked", self.on_bt_load_clicked)
+        self.builder.get_object("bt_delete").connect("clicked", self.on_bt_delete_clicked)
+        self.builder.get_object("bt_quit").connect("clicked",self.on_bt_quit_clicked)
+        self.builder.get_object("bt_split").connect("clicked", self.on_bt_split_clicked)
+        self.builder.get_object("bt_merge").connect("clicked", self.on_bt_merge_clicked)
 
 
 
         self.preview_image = self.builder.get_object("image_view")
         pix = gtk.gdk.pixbuf_new_from_file_at_size(app_jpg,300,200)
         self.preview_image.set_from_pixbuf(pix)
-        self.bt_play = self.builder.get_object("bt_play")
-        self.bt_play.connect("clicked", self.on_bt_play_clicked)
+
+        self.builder.get_object("bt_play").connect("clicked", self.on_bt_play_clicked)
+        self.builder.get_object("bt_a").connect("clicked", self.on_bt_a_clicked)
+        self.builder.get_object("bt_b").connect("clicked", self.on_bt_b_clicked)
 
 
         self.window.show_all()
@@ -134,9 +128,8 @@ class EvMakerApp():
         icon = model[item][COL_PIXBUF_BIG]
         self.preview_image.set_from_pixbuf(icon)
         length = model[item][COL_LENGTH]
-        self.timeline.setNbFrames(float(length))
-        self.timeline.setA(10)
-        self.timeline.setA(90)
+        #self.timeline.setNbFrames(float(length))
+        self.timeline.setNbFrames(float(100))
         print model[item][COL_PATH]
         print length
 
@@ -222,6 +215,14 @@ class EvMakerApp():
         filename = model[item][COL_PATH]
         self.player.preview(filename)
         
+    def on_bt_a_clicked(self, widget):
+        val = self.timeline.get_value()
+        self.timeline.setA(int(val))
+        print val
+    def on_bt_b_clicked(self, widget):
+        val = self.timeline.get_value()
+        self.timeline.setB(int(val))
+        print val
     def load_src_file(self, filename):
         jpg = self.player.get_screenshot(filename)
         length = self.player.get_length(filename)

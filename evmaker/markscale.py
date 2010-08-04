@@ -11,10 +11,11 @@ class MarkScale(gtk.HScale):
 
         self.set_events(gtk.gdk.EXPOSURE_MASK)
         self.markA=0
-        self.markB=0
-        self.nbFrames=0
+        self.markB=100
+        self.nbFrames=100
 
         self.connect("expose-event",self.expose)
+        self.connect("realize", self.realize)
 
 
     def setNbFrames(self,total):
@@ -23,9 +24,16 @@ class MarkScale(gtk.HScale):
 
     def setA(self, a):
         self.markA=a
+        event = gtk.gdk.Event(gtk.gdk.EXPOSE)
+        self.emit("expose-event", event)
 
     def setB(self, b):
         self.markB=b
+        if self.markB < self.markA:
+            self.markB=self.markA
+            self.markA=0
+        event = gtk.gdk.Event(gtk.gdk.EXPOSE)
+        self.emit("expose-event", event)
 
     def realize(self, widget):
         widget.set_size_request(widget.allocation.width,widget.allocation.height+10)
