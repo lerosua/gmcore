@@ -24,6 +24,10 @@ class MarkScale(gtk.HScale):
 
     def setA(self, a):
         self.markA=a
+        if self.markB < self.markA:
+            tmp = self.markA
+            self.markA=self.markB
+            self.markB=tmp
         event = gtk.gdk.Event(gtk.gdk.EXPOSE)
         self.emit("expose-event", event)
 

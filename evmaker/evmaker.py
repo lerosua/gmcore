@@ -16,9 +16,9 @@ COL_NAME = 0
 COL_PIXBUF = 1
 COL_PATH = 2
 COL_PIXBUF_BIG = 3
-COL_LENGTH = 4
+COL_INFO = 4
 
-evhome_dir = "/tmp"
+evhome_dir = "/tmp/"
 video_preview_jpg = "/tmp/00000001.jpg"
 app_jpg = "evmaker.jpg"
 
@@ -108,7 +108,7 @@ class EvMakerApp():
 
 
     def create_store(self):
-        # filename, preview jpg, filepath, big jpg, file length
+        # filename, preview jpg, filepath, big jpg, fileinfo [length,width,height]
         store = gtk.ListStore(str, gtk.gdk.Pixbuf, str, gtk.gdk.Pixbuf, str)
         return store
         
@@ -130,11 +130,14 @@ class EvMakerApp():
         item = selected[0][0]
         icon = model[item][COL_PIXBUF_BIG]
         self.preview_image.set_from_pixbuf(icon)
-        length = model[item][COL_LENGTH]
+        info = model[item][COL_INFO]
+        infos = info.strip('[]').split(',')
+        length = infos[0].strip('\'')
+        w = infos[1].strip(' \'')
+        h = infos[2].strip(' \'')
         self.timeline.setNbFrames(float(length))
-        #self.timeline.setNbFrames(float(100))
         print model[item][COL_PATH]
-        print length
+        print infos,length, w,h
 
 
 
@@ -184,7 +187,7 @@ class EvMakerApp():
 
         a_time = self.label_A.get_text()
         b_time = self.time_to_string(self.timeline.getB() - self.timeline.getA())
-        outfile = "outfile"+str(self.file_num)+".avi"
+        outfile = evhome_dir+"outfile_"+str(self.file_num)+".avi"
         cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac copy "+filename+" -o "+outfile
         self.file_num += 1
         print cmd
@@ -196,12 +199,23 @@ class EvMakerApp():
         model = self.iconview_dst.get_model()
         iter = model.get_iter_first()
         filename = ""
+        size_w = 1000
+        size_h = 0
         while ( iter != None ):
             row = model.get_path(iter)
             filename += " "
             filename += model[row][COL_PATH]
+            info = model[row][COL_INFO]
+            infos = info.strip('[]').split(',')
+            print infos , infos[1]
+            w = infos[1].strip(' \'')
+            h = infos[2].strip(' \'')
+            if int(w) < size_w :
+                size_w = int(w)
+                size_h = int(h)
             iter = model.iter_next(iter)
-        cmd = "mencoder -ovc copy -oac copy "+filename+" -o /tmp/out.avi"
+        pic_size = str(size_w)+":"+str(size_h)
+        cmd = "mencoder -ovc lavc -oac mp3lame -idx -vf scale=" + pic_size + " " + filename+" -o /tmp/out.avi"
         print cmd
         self.wait_run(cmd)
 
@@ -230,19 +244,23 @@ class EvMakerApp():
 
     def load_src_file(self, filename):
         jpg = self.player.get_screenshot(filename)
-        length = self.player.get_length(filename)
+        #length = self.player.get_length(filename)
+        length,width,height = self.player.get_info(filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(jpg,400,300)
         name = os.path.basename(filename)
-        self.store_src.append([name,tmpicon,filename,tmpicon_preview, length])
+        #self.store_src.append([name,tmpicon,filename,tmpicon_preview, length])
+        self.store_src.append([name,tmpicon,filename,tmpicon_preview, [length,width,height]])
 
     def load_dst_file(self, filename):
         jpg = self.player.get_screenshot(filename)
-        length = self.player.get_length(filename)
+        #length = self.player.get_length(filename)
+        length,width,height = self.player.get_info(filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(jpg,400,300)
         name = os.path.basename(filename)
-        self.store_dst.append([name,tmpicon,filename,tmpicon_preview, length])
+        #self.store_dst.append([name,tmpicon,filename,tmpicon_preview, length])
+        self.store_dst.append([name,tmpicon,filename,tmpicon_preview, [length,width,height]])
 
 
     def drag_data_src_get(self,widget, context, selection_data, info, timestamp):
