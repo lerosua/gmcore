@@ -69,7 +69,7 @@ class EvMakerApp():
         self.store_dst = self.create_store()
         self.iconview_dst.set_model(self.store_dst)
         self.iconview_dst.set_reorderable(1)
-        self.iconview_dst.set_selection_mode(gtk.SELECTION_SINGLE)
+        #self.iconview_dst.set_selection_mode(gtk.SELECTION_SINGLE)
         self.iconview_dst.set_orientation(gtk.ORIENTATION_VERTICAL)
         self.iconview_dst.set_columns(20)
         self.iconview_dst.set_item_width(90)
