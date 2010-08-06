@@ -6,8 +6,7 @@ import os
 import pygtk
 pygtk.require("2.0")
 import gtk
-from urllib import quote
-from urllib import unquote
+import utils
 from markscale import MarkScale
 from player import player
 
@@ -37,6 +36,7 @@ class EvMakerApp():
         self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
         self.player = player()
         self.file_num = 1
+        self.time_mark ="A"
 
         self.store_src  = self.create_store()
         #self.fill_store()
@@ -50,20 +50,21 @@ class EvMakerApp():
         self.iconview_src.set_item_width(90)
         self.iconview_src.set_text_column(COL_NAME)
         self.iconview_src.set_pixbuf_column(COL_PIXBUF)
-        self.iconview_src.connect("item-activated", self.on_src_item_activated)
+        self.iconview_src.connect("item-activated", self.on_item_activated)
         self.iconview_src.connect("selection-changed", self.on_src_item_selection_changed)
 
         self.ipcTargets = [('STRING',0,0)]
-        self.iconview_src.drag_source_set(gtk.gdk.BUTTON1_MASK, self.ipcTargets, gtk.gdk.ACTION_COPY)
-        self.iconview_src.connect("drag_data_get", self.drag_data_src_get)
+        #self.iconview_src.drag_source_set(gtk.gdk.BUTTON1_MASK, self.ipcTargets, gtk.gdk.ACTION_COPY)
+        #self.iconview_src.connect("drag_data_get", self.drag_data_src_get)
 
-        self.all_vbox = self.builder.get_object("all_vbox")
-        self.all_vbox.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
-        self.all_vbox.connect("drag_data_received", self.drag_data_src_received)
+        self.vbox_src_drag = self.builder.get_object("vbox_src_drag")
+        self.vbox_src_drag.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
+        self.vbox_src_drag.connect("drag_data_received", self.drag_data_src_received)
 
-        #self.iconview_src.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
+        #self.iconview_src.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_MOVE)
         #self.iconview_src.connect("drag_data_received", self.drag_data_src_received)
 
+        #iconview_dst for put the split out video
         self.iconview_dst = self.builder.get_object("iconview_dst")
         self.store_dst = self.create_store()
         self.iconview_dst.set_model(self.store_dst)
@@ -74,7 +75,20 @@ class EvMakerApp():
         self.iconview_dst.set_item_width(90)
         self.iconview_dst.set_text_column(COL_NAME)
         self.iconview_dst.set_pixbuf_column(COL_PIXBUF)
-        self.iconview_dst.connect("item-activated", self.on_src_item_activated)
+        self.iconview_dst.connect("item-activated", self.on_item_activated)
+
+        #for put source audio file
+        self.iconview_audio = self.builder.get_object("iconview_audio")
+        self.store_audio = self.create_store()
+        self.iconview_audio.set_model(self.store_audio)
+        self.iconview_audio.set_reorderable(1)
+        self.iconview_audio.set_selection_mode(gtk.SELECTION_SINGLE)
+        self.iconview_audio.set_orientation(gtk.ORIENTATION_VERTICAL)
+        self.iconview_audio.set_columns(20)
+        self.iconview_audio.set_item_width(90)
+        self.iconview_audio.set_text_column(COL_NAME)
+        self.iconview_audio.set_pixbuf_column(COL_PIXBUF)
+        self.iconview_audio.connect("item-activated", self.on_item_activated)
 
         #for timeline
         adj = gtk.Adjustment(0.0,0.0,100.0,0.1,1.0,1.0)
@@ -102,6 +116,10 @@ class EvMakerApp():
         self.builder.get_object("bt_play").connect("clicked", self.on_bt_play_clicked)
         self.builder.get_object("bt_a").connect("clicked", self.on_bt_a_clicked)
         self.builder.get_object("bt_b").connect("clicked", self.on_bt_b_clicked)
+        self.builder.get_object("bt_as").connect("clicked", self.on_bt_as_clicked)
+        self.builder.get_object("bt_bs").connect("clicked", self.on_bt_bs_clicked)
+        self.builder.get_object("bt_time_add").connect("clicked", self.on_bt_time_add_clicked)
+        self.builder.get_object("bt_time_sub").connect("clicked", self.on_bt_time_sub_clicked)
 
 
         self.window.show_all()
@@ -116,7 +134,7 @@ class EvMakerApp():
         theme = gtk.icon_theme_get_default()
         return theme.load_icon(name,48,0)
 
-    def on_src_item_activated(self,widget, item):
+    def on_item_activated(self,widget, item):
         model = widget.get_model()
         path = model[item][COL_PATH]
         self.player.preview(path)
@@ -186,7 +204,7 @@ class EvMakerApp():
         filename = model[item][COL_PATH]
 
         a_time = self.label_A.get_text()
-        b_time = self.time_to_string(self.timeline.getB() - self.timeline.getA())
+        b_time = utils.time_to_string(self.timeline.getB() - self.timeline.getA())
         outfile = evhome_dir+"outfile_"+str(self.file_num)+".avi"
         cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac copy "+filename+" -o "+outfile
         self.file_num += 1
@@ -214,6 +232,8 @@ class EvMakerApp():
                 size_w = int(w)
                 size_h = int(h)
             iter = model.iter_next(iter)
+        if filename == "":
+            return 0
         pic_size = str(size_w)+":"+str(size_h)
         cmd = "mencoder -ovc lavc -oac mp3lame -idx -vf scale=" + pic_size + " " + filename+" -o /tmp/out.avi"
         print cmd
@@ -227,20 +247,58 @@ class EvMakerApp():
         item = selected[0][0]
         filename = model[item][COL_PATH]
         a_time = self.label_A.get_text()
-        b_time = self.time_to_string(self.timeline.getB() - self.timeline.getA())
+        b_time = utils.time_to_string(self.timeline.getB() - self.timeline.getA())
         self.player.preview(filename,a_time,b_time)
         
     def on_bt_a_clicked(self, widget):
         val = self.timeline.get_value()
         self.timeline.setA(float('%.2f'%val))
         a = self.timeline.getA()
-        self.label_A.set_text(self.time_to_string(a))
+        self.label_A.set_text(utils.time_to_string(a))
+        self.time_mark = "A"
 
     def on_bt_b_clicked(self, widget):
         val = self.timeline.get_value()
         self.timeline.setB(float('%.2f'%val))
         b = self.timeline.getB()
-        self.label_B.set_text(self.time_to_string(b))
+        self.label_B.set_text(utils.time_to_string(b))
+        self.time_mark = "B"
+
+    def on_bt_as_clicked(self, widget):
+        self.timeline.syncA()
+        self.time_mark = "A"
+
+    def on_bt_bs_clicked(self, widget):
+        self.timeline.syncB()
+        self.time_mark = "B"
+
+    def on_bt_time_add_clicked(self, widget):
+        if self.time_mark == "A":
+            astr = self.label_A.get_text()
+            a = utils.string_to_time(astr)
+            a = a+1
+            self.label_A.set_text(utils.time_to_string(a))
+        elif self.time_mark == "B":
+            astr = self.label_B.get_text()
+            b = utils.string_to_time(astr)
+            b = b+1
+            self.label_B.set_text(utils.time_to_string(b))
+        
+    def on_bt_time_sub_clicked(self, widget):
+        if self.time_mark == "A":
+            astr = self.label_A.get_text()
+            a = utils.string_to_time(astr)
+            a = a-1
+            if a< 0 :
+                a = 0
+            self.label_A.set_text(utils.time_to_string(a))
+        elif self.time_mark == "B":
+            astr = self.label_B.get_text()
+            b = utils.string_to_time(astr)
+            b = b-1
+            if b < 0:
+                b=0
+            self.label_B.set_text(utils.time_to_string(b))
 
     def load_src_file(self, filename):
         jpg = self.player.get_screenshot(filename)
@@ -267,9 +325,15 @@ class EvMakerApp():
         print "drag get"
 
     def drag_data_src_received(self, widget, context, x, y, selection, targetType, timestamp):
-        filename = selection.data.strip()
-        tmp = unquote(filename.strip('[\']'))
-        self.load_src_file(tmp[7:])
+        #filename = selection.data.strip()
+        #tmp = unquote(filename.strip('[\']'))
+        #self.load_src_file(tmp[7:])
+
+        uri = selection.data.strip('\r\n\x00')
+        uri_splitted = uri.split()
+        for uri in uri_splitted:
+            path = utils.get_file_path_from_dnd_dropped_uri(uri)
+            self.load_src_file(path)
 
     def run(self,program, *args):
         pid = os.fork()
@@ -283,19 +347,6 @@ class EvMakerApp():
             os.system(cmd)
             sys.exit(0)
         return os.wait()[0]
-
-    def time_to_string(self,value):
-        """
-        Converts the given time in nanoseconds to a human readable string
-    
-        Format HH:MM:SS
-        """
-        mins = value / 60
-        sec = value % 60
-        hours = mins / 60
-        mins = mins % 60
-        return "%02d:%02d:%02d" % (hours, mins, sec)
-
 
        
 if __name__ == "__main__":

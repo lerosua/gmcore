@@ -42,13 +42,18 @@ class MarkScale(gtk.HScale):
     def getA(self):
         a = (self.total*self.markA)/100
         print 'a = ',a, '  markA = ',self.markA
-        #return '%.2f'%a
         return int(a)
+
     def getB(self):
         b = (self.total*(self.markB+1.00))/100
         print 'b = ',b, '   markB = ',self.markB
-        #return '%.2f'%b
         return int(b)
+
+    def syncA(self):
+        self.set_value(self.markA)
+
+    def syncB(self):
+        self.set_value(self.markB)
 
     def realize(self, widget):
         widget.set_size_request(widget.allocation.width,widget.allocation.height+10)

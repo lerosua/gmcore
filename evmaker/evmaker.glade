@@ -60,6 +60,7 @@
                 <child>
                   <object class="GtkImage" id="image4">
                     <property name="visible">True</property>
+                    <property name="tooltip_text" translatable="yes">&#x526A;&#x8F91;A-B</property>
                     <property name="icon_name">edit-cut</property>
                   </object>
                 </child>
@@ -141,23 +142,121 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow_src">
-            <property name="height_request">96</property>
+          <object class="GtkVBox" id="vbox2">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">automatic</property>
-            <property name="vscrollbar_policy">automatic</property>
+            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkIconView" id="iconview_src">
+              <object class="GtkHBox" id="hbox4">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="orientation">horizontal</property>
+                <child>
+                  <object class="GtkLabel" id="label3">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">  &#x89C6;&#x9891;&#x6E90;&#x901A;&#x9053;   </property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox_src_drag">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow_src">
+                    <property name="height_request">96</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <object class="GtkIconView" id="iconview_src">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="orientation">horizontal</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">  &#x97F3;&#x9891;&#x6E90;&#x901A;&#x9053;   </property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox_audio_drag">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow_audio">
+                    <property name="height_request">72</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">never</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <object class="GtkIconView" id="iconview_audio">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="orientation">horizontal</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
             <property name="position">1</property>
           </packing>
         </child>
@@ -171,13 +270,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHSeparator" id="hseparator2">
-            <property name="visible">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="position">3</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkVBox" id="vbox1">
@@ -213,6 +306,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">&#x8BBE;&#x5B9A;A&#x6807;&#x8BB0;</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -226,6 +320,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">&#x8BBE;&#x5B9A;B&#x6807;&#x8BB0;</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -234,10 +329,11 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button5">
+                          <object class="GtkButton" id="bt_time_sub">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">&#x51CF;&#x5C0F;1&#x79D2;&#x65F6;&#x95F4;</property>
                             <child>
                               <object class="GtkImage" id="image16">
                                 <property name="visible">True</property>
@@ -252,10 +348,11 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button2">
+                          <object class="GtkButton" id="bt_time_add">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">&#x589E;&#x52A0;1&#x79D2;&#x65F6;&#x95F4;</property>
                             <child>
                               <object class="GtkImage" id="image5">
                                 <property name="visible">True</property>
@@ -424,9 +521,11 @@
                       <object class="GtkHBox" id="hbox10">
                         <property name="visible">True</property>
                         <child>
-                          <object class="GtkLabel" id="label6">
+                          <object class="GtkButton" id="bt_as">
+                            <property name="label" translatable="yes">A</property>
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">A: </property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -455,14 +554,15 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label10">
+                          <object class="GtkButton" id="bt_bs">
+                            <property name="label" translatable="yes">B</property>
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">B: </property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="pack_type">end</property>
                             <property name="position">4</property>
                           </packing>
                         </child>
@@ -571,7 +671,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkVBox" id="vbox2">
+          <object class="GtkVBox" id="vbox_merge">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
@@ -580,7 +680,7 @@
                 <child>
                   <object class="GtkLabel" id="label1">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">  &#x5408;&#x6210;&#x901A;&#x9053;   </property>
+                    <property name="label" translatable="yes">  &#x89C6;&#x9891;&#x5408;&#x6210;&#x901A;&#x9053;   </property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -601,7 +701,7 @@
             </child>
             <child>
               <object class="GtkScrolledWindow" id="scrolledwindow_dst">
-                <property name="height_request">100</property>
+                <property name="height_request">96</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hscrollbar_policy">automatic</property>
@@ -620,6 +720,59 @@
                 <property name="position">1</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkHBox" id="hbox3">
+                <property name="visible">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkButton" id="bt_dst_clean">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">&#x6E05;&#x7A7A;&#x5408;&#x6210;&#x901A;&#x9053;</property>
+                    <child>
+                      <object class="GtkImage" id="image14">
+                        <property name="visible">True</property>
+                        <property name="icon_name">edit-delete</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="bt_merge">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">&#x5408;&#x6210;&#x89C6;&#x9891;&#x901A;&#x9053;&#x5185;&#x6240;&#x6709;&#x526A;&#x8F91;</property>
+                    <child>
+                      <object class="GtkImage" id="image13">
+                        <property name="visible">True</property>
+                        <property name="icon_name">document-save</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -628,39 +781,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="hbox7">
-            <property name="visible">True</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkButton" id="bt_merge">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <child>
-                  <object class="GtkImage" id="image14">
-                    <property name="visible">True</property>
-                    <property name="icon_name">document-save</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack_type">end</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">7</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkStatusbar" id="statusbar1">
