@@ -43,7 +43,10 @@ class player():
 
 
     def preview(self,filename,a_time,b_time):
-        self.run("mplayer","-osdlevel","3","-ss",a_time,"-endpos",b_time,filename)
+        if b_time == "":
+            self.run("mplayer","-osdlevel","3",filename)
+        else:
+            self.run("mplayer","-osdlevel","3","-ss",a_time,"-endpos",b_time,filename)
 
     def run(self,program, *args):
         pid = os.fork()

@@ -31,9 +31,9 @@ class EvMakerApp():
         self.window.set_title("Easy Video Maker")
         self.window.connect("destroy", gtk.main_quit)
 
-        self.current_dir = "/home/leros/"
-        self.fileIcon = self.get_icon(gtk.STOCK_FILE)
-        self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
+        #self.current_dir = "/home/leros/"
+        #self.fileIcon = self.get_icon(gtk.STOCK_FILE)
+        #self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
         self.player = player()
         self.file_num = 1
         self.time_mark ="A"
@@ -126,6 +126,8 @@ class EvMakerApp():
         self.builder.get_object("bt_time_add").connect("clicked", self.on_bt_time_add_clicked)
         self.builder.get_object("bt_time_sub").connect("clicked", self.on_bt_time_sub_clicked)
         self.builder.get_object("bt_audio_add").connect("clicked", self.on_bt_audio_add_clicked)
+        self.builder.get_object("bt_audio_apply").connect("clicked", self.on_bt_audio_apply_clicked)
+        self.builder.get_object("bt_audio_merge").connect("clicked", self.on_bt_audio_merge_clicked)
         self.builder.get_object("bt_dst_add").connect("clicked", self.on_bt_dst_add_clicked)
         self.builder.get_object("bt_dst_clean").connect("clicked", self.on_bt_dst_clean_clicked)
         self.builder.get_object("bt_dst_merge").connect("clicked", self.on_bt_merge_clicked)
@@ -146,7 +148,7 @@ class EvMakerApp():
     def on_item_activated(self,widget, item):
         model = widget.get_model()
         path = model[item][COL_PATH]
-        self.player.preview(path)
+        self.player.preview(path,"","")
 
     def on_src_item_selection_changed(self, widget):
         self.iconview_dst.unselect_all()
@@ -163,8 +165,10 @@ class EvMakerApp():
         w = infos[1].strip(' \'')
         h = infos[2].strip(' \'')
         self.timeline.setNbFrames(float(length))
-        print model[item][COL_PATH]
-        print infos,length, w,h
+        str_len = utils.time_to_string(float(length))
+        name = model[item][COL_NAME]
+        context = name +":"+str_len
+        self.statusbar.push(0,context)
 
     def on_audio_item_selection_changed(self, widget):
         model = widget.get_model()
@@ -173,10 +177,15 @@ class EvMakerApp():
             return
         item = selected[0][0]
         name = model[item][COL_NAME]
-        length = model[item][COL_INFO]
-        slen = utils.time_to_string(float(length))
-        context = name +":"+slen
+        info = model[item][COL_INFO]
+        infos = info.strip('[]').split(',')
+        length = infos[0].strip('\'')
+        a = infos[1].strip(' \'')
+        b = infos[2].strip(' \'')
+        str_len = utils.time_to_string(float(length))
+        context = name +":"+str_len
         self.statusbar.push(0,context)
+        print "audio file a-b",a, b
 
 
     def on_bt_open_clicked(self, widget):
@@ -226,6 +235,43 @@ class EvMakerApp():
         if fn_widget.run() == gtk.RESPONSE_OK:
             self.load_audio_file(fn_widget.get_filename())
         fn_widget.destroy()
+
+    def on_bt_audio_apply_clicked(self, widget):
+        model = self.iconview_audio.get_model()
+        selected = self.iconview_audio.get_selected_items()
+        if len(selected) == 0:
+            return
+        a_time = self.label_A.get_text()
+        b_time = self.label_B.get_text()
+        item = selected[0][0]
+        info = model[item][COL_INFO]
+        infos = info.strip('[]').split(',')
+        length = infos[0].strip('\'')
+        model[item][COL_INFO] = [length, a_time, b_time]
+        dirIcon = self.get_icon(gtk.STOCK_OPEN)
+        model[item][COL_PIXBUF] = dirIcon
+
+    def on_bt_audio_merge_clicked(self, widget):
+        a_model = self.iconview_audio.get_model()
+        v_model = self.iconview_src.get_model()
+        selected = self.iconview_src.get_selected_items()
+        if len(selected) == 0:
+            return
+        item = selected[0][0]
+        video_filename = v_model[item][COL_PATH]
+
+        audio_filename = ""
+        iter = a_model.get_iter_first()
+        while ( iter != None ):
+            row = a_model.get_path(iter)
+            audio_filename += " "
+            audio_filename += a_model[row][COL_PATH]
+            info = a_model[row][COL_INFO]
+            infos = info.strip('[]').split(',')
+            a = infos[1].strip(' \'')
+            b = infos[2].strip(' \'')
+            print "merge ",video_filename,audio_filename , a,b
+            iter = a_model.iter_next(iter)
 
     def on_bt_delete_clicked(self,widget):
         model = self.iconview_src.get_model()
@@ -388,7 +434,8 @@ class EvMakerApp():
         length = self.player.get_length(filename)
         jpg  = self.get_icon(gtk.STOCK_FILE)
         name = os.path.basename(filename)
-        self.store_audio.append([name,jpg,filename,jpg, length])
+        # if audio file , the info is length a_time,b_time(a-b is time of video)
+        self.store_audio.append([name,jpg,filename,jpg, [length,"0","0"]])
 
     def drag_data_src_get(self,widget, context, selection_data, info, timestamp):
         print "drag get"
