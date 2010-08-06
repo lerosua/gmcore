@@ -69,7 +69,7 @@ class EvMakerApp():
         self.store_dst = self.create_store()
         self.iconview_dst.set_model(self.store_dst)
         self.iconview_dst.set_reorderable(1)
-        #self.iconview_dst.set_selection_mode(gtk.SELECTION_SINGLE)
+        self.iconview_dst.set_selection_mode(gtk.SELECTION_MULTIPLE)
         self.iconview_dst.set_orientation(gtk.ORIENTATION_VERTICAL)
         self.iconview_dst.set_columns(20)
         self.iconview_dst.set_item_width(90)
@@ -101,8 +101,7 @@ class EvMakerApp():
         self.builder.get_object("bt_load").connect("clicked", self.on_bt_load_clicked)
         self.builder.get_object("bt_delete").connect("clicked", self.on_bt_delete_clicked)
         self.builder.get_object("bt_quit").connect("clicked",self.on_bt_quit_clicked)
-        self.builder.get_object("bt_split").connect("clicked", self.on_bt_split_clicked)
-        self.builder.get_object("bt_merge").connect("clicked", self.on_bt_merge_clicked)
+        self.builder.get_object("bt_src_split").connect("clicked", self.on_bt_split_clicked)
 
         self.label_A = self.builder.get_object("label_A_time")
         self.label_B = self.builder.get_object("label_B_time")
@@ -120,6 +119,9 @@ class EvMakerApp():
         self.builder.get_object("bt_bs").connect("clicked", self.on_bt_bs_clicked)
         self.builder.get_object("bt_time_add").connect("clicked", self.on_bt_time_add_clicked)
         self.builder.get_object("bt_time_sub").connect("clicked", self.on_bt_time_sub_clicked)
+        self.builder.get_object("bt_dst_add").connect("clicked", self.on_bt_dst_add_clicked)
+        #self.builder.get_object("bt_dst_clean").connect("clicked", self.on_bt_dst_clean_clicked)
+        self.builder.get_object("bt_dst_merge").connect("clicked", self.on_bt_merge_clicked)
 
 
         self.window.show_all()
@@ -175,6 +177,21 @@ class EvMakerApp():
         fn_widget.add_filter(fn_filter_all)
         if fn_widget.run() == gtk.RESPONSE_OK:
             self.load_src_file(fn_widget.get_filename())
+        fn_widget.destroy()
+
+    def on_bt_dst_add_clicked(self, widget):
+        fn_widget = gtk.FileChooserDialog("Select a Video File",None,gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+        fn_widget.set_local_only(True)
+        fn_filter = gtk.FileFilter()
+        fn_filter.set_name("video/*")
+        fn_filter.add_mime_type("video/*")
+        fn_widget.add_filter(fn_filter)
+        fn_filter_all = gtk.FileFilter()
+        fn_filter_all.set_name("all file")
+        fn_filter_all.add_pattern("*")
+        fn_widget.add_filter(fn_filter_all)
+        if fn_widget.run() == gtk.RESPONSE_OK:
+            self.load_dst_file(fn_widget.get_filename())
         fn_widget.destroy()
 
     def on_bt_cut_clicked(self,widget):

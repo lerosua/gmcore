@@ -51,7 +51,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="bt_split">
+              <object class="GtkButton" id="bt_src_split">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -844,7 +844,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="bt_merge">
+                  <object class="GtkButton" id="bt_dst_merge">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
