@@ -38,6 +38,7 @@ class EvMakerApp():
         self.file_num = 1
         self.time_mark ="A"
 
+        self.statusbar = self.builder.get_object("statusbar")
         self.store_src  = self.create_store()
         #self.fill_store()
         #iconview_src put the source of video
@@ -89,6 +90,7 @@ class EvMakerApp():
         self.iconview_audio.set_text_column(COL_NAME)
         self.iconview_audio.set_pixbuf_column(COL_PIXBUF)
         self.iconview_audio.connect("item-activated", self.on_item_activated)
+        self.iconview_audio.connect("selection-changed", self.on_audio_item_selection_changed)
 
         self.vbox_audio_drag = self.builder.get_object("vbox_audio_drag")
         self.vbox_audio_drag.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
@@ -164,6 +166,17 @@ class EvMakerApp():
         print model[item][COL_PATH]
         print infos,length, w,h
 
+    def on_audio_item_selection_changed(self, widget):
+        model = widget.get_model()
+        selected = widget.get_selected_items()
+        if len(selected) == 0:
+            return
+        item = selected[0][0]
+        name = model[item][COL_NAME]
+        length = model[item][COL_INFO]
+        slen = utils.time_to_string(float(length))
+        context = name +":"+slen
+        self.statusbar.push(0,context)
 
 
     def on_bt_open_clicked(self, widget):
