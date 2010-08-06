@@ -90,6 +90,9 @@ class EvMakerApp():
         self.iconview_audio.set_pixbuf_column(COL_PIXBUF)
         self.iconview_audio.connect("item-activated", self.on_item_activated)
 
+        self.vbox_audio_drag = self.builder.get_object("vbox_audio_drag")
+        self.vbox_audio_drag.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
+        self.vbox_audio_drag.connect("drag_data_received", self.drag_data_audio_received)
         #for timeline
         adj = gtk.Adjustment(0.0,0.0,100.0,0.1,1.0,1.0)
         self.timeline = MarkScale(adj)
@@ -119,8 +122,9 @@ class EvMakerApp():
         self.builder.get_object("bt_bs").connect("clicked", self.on_bt_bs_clicked)
         self.builder.get_object("bt_time_add").connect("clicked", self.on_bt_time_add_clicked)
         self.builder.get_object("bt_time_sub").connect("clicked", self.on_bt_time_sub_clicked)
+        self.builder.get_object("bt_audio_add").connect("clicked", self.on_bt_audio_add_clicked)
         self.builder.get_object("bt_dst_add").connect("clicked", self.on_bt_dst_add_clicked)
-        #self.builder.get_object("bt_dst_clean").connect("clicked", self.on_bt_dst_clean_clicked)
+        self.builder.get_object("bt_dst_clean").connect("clicked", self.on_bt_dst_clean_clicked)
         self.builder.get_object("bt_dst_merge").connect("clicked", self.on_bt_merge_clicked)
 
 
@@ -194,6 +198,21 @@ class EvMakerApp():
             self.load_dst_file(fn_widget.get_filename())
         fn_widget.destroy()
 
+    def on_bt_audio_add_clicked(self, widget):
+        fn_widget = gtk.FileChooserDialog("Select a Video File",None,gtk.FILE_CHOOSER_ACTION_OPEN,buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+        fn_widget.set_local_only(True)
+        fn_filter = gtk.FileFilter()
+        fn_filter.set_name("Audio/*")
+        fn_filter.add_mime_type("Audio/*")
+        fn_widget.add_filter(fn_filter)
+        fn_filter_all = gtk.FileFilter()
+        fn_filter_all.set_name("all file")
+        fn_filter_all.add_pattern("*")
+        fn_widget.add_filter(fn_filter_all)
+        if fn_widget.run() == gtk.RESPONSE_OK:
+            self.load_audio_file(fn_widget.get_filename())
+        fn_widget.destroy()
+
     def on_bt_cut_clicked(self,widget):
         print "test"
     
@@ -211,6 +230,10 @@ class EvMakerApp():
 
     def on_bt_quit_clicked(self,widget):
         gtk.main_quit()
+
+    def on_bt_dst_clean_clicked(self, widget):
+        model = self.iconview_dst.get_model()
+        model.clear()
 
     def on_bt_split_clicked(self, widget):
         model = self.iconview_src.get_model()
@@ -329,14 +352,18 @@ class EvMakerApp():
 
     def load_dst_file(self, filename):
         jpg = self.player.get_screenshot(filename)
-        #length = self.player.get_length(filename)
         length,width,height = self.player.get_info(filename)
         tmpicon = gtk.gdk.pixbuf_new_from_file_at_size(jpg,96,96)
         tmpicon_preview = gtk.gdk.pixbuf_new_from_file_at_size(jpg,400,300)
         name = os.path.basename(filename)
-        #self.store_dst.append([name,tmpicon,filename,tmpicon_preview, length])
         self.store_dst.append([name,tmpicon,filename,tmpicon_preview, [length,width,height]])
 
+
+    def load_audio_file(self, filename):
+        length = self.player.get_length(filename)
+        jpg  = self.get_icon(gtk.STOCK_FILE)
+        name = os.path.basename(filename)
+        self.store_audio.append([name,jpg,filename,jpg, length])
 
     def drag_data_src_get(self,widget, context, selection_data, info, timestamp):
         print "drag get"
@@ -351,6 +378,14 @@ class EvMakerApp():
         for uri in uri_splitted:
             path = utils.get_file_path_from_dnd_dropped_uri(uri)
             self.load_src_file(path)
+
+    def drag_data_audio_received(self, widget, context, x, y, selection, targetType, timestamp):
+        uri = selection.data.strip('\r\n\x00')
+        uri_splitted = uri.split()
+        for uri in uri_splitted:
+            path = utils.get_file_path_from_dnd_dropped_uri(uri)
+            self.load_audio_file(path)
+
 
     def run(self,program, *args):
         pid = os.fork()
