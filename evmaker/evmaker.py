@@ -78,6 +78,10 @@ class EvMakerApp():
         self.iconview_dst.set_pixbuf_column(COL_PIXBUF)
         self.iconview_dst.connect("item-activated", self.on_item_activated)
 
+        self.vbox_dst_merge = self.builder.get_object("vbox_dst_merge")
+        self.vbox_dst_merge.drag_dest_set(gtk.DEST_DEFAULT_DROP | gtk.DEST_DEFAULT_MOTION, self.ipcTargets, gtk.gdk.ACTION_COPY)
+        self.vbox_dst_merge.connect("drag_data_received", self.drag_data_dst_received)
+
         #for put source audio file
         self.iconview_audio = self.builder.get_object("iconview_audio")
         self.store_audio = self.create_store()
@@ -105,7 +109,7 @@ class EvMakerApp():
         self.builder.get_object("bt_about").connect("clicked", self.on_about_clicked)
         self.builder.get_object("bt_open").connect("clicked", self.on_bt_open_clicked)
         self.builder.get_object("bt_load").connect("clicked", self.on_bt_load_clicked)
-        self.builder.get_object("bt_delete").connect("clicked", self.on_bt_delete_clicked)
+        self.builder.get_object("bt_src_del").connect("clicked", self.on_bt_src_del_clicked)
         self.builder.get_object("bt_quit").connect("clicked",self.on_bt_quit_clicked)
         self.builder.get_object("bt_src_split").connect("clicked", self.on_bt_split_clicked)
 
@@ -126,7 +130,9 @@ class EvMakerApp():
         self.builder.get_object("bt_time_add").connect("clicked", self.on_bt_time_add_clicked)
         self.builder.get_object("bt_time_sub").connect("clicked", self.on_bt_time_sub_clicked)
         self.builder.get_object("bt_audio_add").connect("clicked", self.on_bt_audio_add_clicked)
+        self.builder.get_object("bt_audio_del").connect("clicked", self.on_bt_audio_del_clicked)
         self.builder.get_object("bt_audio_apply").connect("clicked", self.on_bt_audio_apply_clicked)
+        self.builder.get_object("bt_audio_split").connect("clicked", self.on_bt_audio_split_clicked)
         self.builder.get_object("bt_audio_merge").connect("clicked", self.on_bt_audio_merge_clicked)
         self.builder.get_object("bt_dst_add").connect("clicked", self.on_bt_dst_add_clicked)
         self.builder.get_object("bt_dst_clean").connect("clicked", self.on_bt_dst_clean_clicked)
@@ -236,6 +242,15 @@ class EvMakerApp():
             self.load_audio_file(fn_widget.get_filename())
         fn_widget.destroy()
 
+    def on_bt_audio_del_clicked(self, widget):
+        model = self.iconview_audio.get_model()
+        selected = self.iconview_audio.get_selected_items()
+        if len(selected) == 0:
+            return
+        item = selected[0][0]
+        iter = model.get_iter(item)
+        model.remove(iter)
+
     def on_bt_audio_apply_clicked(self, widget):
         model = self.iconview_audio.get_model()
         selected = self.iconview_audio.get_selected_items()
@@ -251,6 +266,32 @@ class EvMakerApp():
         dirIcon = self.get_icon(gtk.STOCK_OPEN)
         model[item][COL_PIXBUF] = dirIcon
 
+    def on_bt_audio_split_clicked(self, widget):
+        a_model = self.iconview_audio.get_model()
+        v_model = self.iconview_src.get_model()
+        v_selected = self.iconview_src.get_selected_items()
+        if len(v_selected) == 0:
+            return
+        a_selected = self.iconview_audio.get_selected_items()
+        if len(a_selected) == 0:
+            return
+        v_item = v_selected[0][0]
+        video_filename = v_model[v_item][COL_PATH]
+        a_item = a_selected[0][0]
+        audio_filename = a_model[a_item][COL_PATH]
+        info = a_model[a_item][COL_INFO]
+        infos = info.strip('[]').split(',')
+        a_time = infos[1].strip(' \'')
+        b = infos[2].strip(' \'')
+        b_time = utils.string_time_sub(b, a_time)
+        outfile = evhome_dir+"outfile_"+str(self.file_num)+".avi"
+        cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac mp3lame -audiofile " + audio_filename +" "+ video_filename + " -o " + outfile
+        print cmd
+        self.file_num += 1
+        self.wait_run(cmd)
+        self.load_dst_file(outfile)
+
+
     def on_bt_audio_merge_clicked(self, widget):
         a_model = self.iconview_audio.get_model()
         v_model = self.iconview_src.get_model()
@@ -259,21 +300,51 @@ class EvMakerApp():
             return
         item = selected[0][0]
         video_filename = v_model[item][COL_PATH]
+        v_info = v_model[item][COL_INFO]
+        v_infos = v_info.strip('[]').split(',')
+        v_length = v_infos[0].strip('\'')
+        v_end = utils.time_to_string(float(v_length))
 
         audio_filename = ""
         iter = a_model.get_iter_first()
+        time_p = "00:00:00"
+        cmd = ""
+        num = 0
         while ( iter != None ):
             row = a_model.get_path(iter)
-            audio_filename += " "
-            audio_filename += a_model[row][COL_PATH]
+            audio_filename = a_model[row][COL_PATH]
             info = a_model[row][COL_INFO]
             infos = info.strip('[]').split(',')
-            a = infos[1].strip(' \'')
+            a_time = infos[1].strip(' \'')
             b = infos[2].strip(' \'')
-            print "merge ",video_filename,audio_filename , a,b
+            if b == "0":
+                iter = a_model.iter_next(iter)
+                continue
+            b_time = utils.string_time_sub(b, a_time)
+            #if utils.string_to_time(a_time) == 0:
+            if a_time == time_p:
+                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +".avi "
+                time_p = b_time
+            else:
+                cmd += "mencoder -ss "+ time_p + " -endpos "+ a_time +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +".avi "
+                num +=1
+                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +".avi "
+                num +=1
+                time_p = b_time
+                
             iter = a_model.iter_next(iter)
+        if time_p != v_end:
+                cmd += "mencoder -ss "+ time_p + " -endpos "+ v_end +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +".avi "
 
-    def on_bt_delete_clicked(self,widget):
+        filelist=""
+        for i in range(num+1):
+            filelist += "dumpvideo"+str(i)+".avi "
+
+        cmd +="\n mencoder -ovc copy -oac copy -o dumpvideo.avi "+filelist
+
+        print cmd
+
+    def on_bt_src_del_clicked(self,widget):
         model = self.iconview_src.get_model()
         selected = self.iconview_src.get_selected_items()
         if len(selected) == 0:
@@ -301,7 +372,9 @@ class EvMakerApp():
         filename = model[item][COL_PATH]
 
         a_time = self.label_A.get_text()
-        b_time = utils.time_to_string(self.timeline.getB() - self.timeline.getA())
+        b = self.label_B.get_text()
+        b_time = utils.string_time_sub(b,a_time)
+        #b_time = utils.time_to_string(self.timeline.getB() - self.timeline.getA())
         outfile = evhome_dir+"outfile_"+str(self.file_num)+".avi"
         cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac copy "+filename+" -o "+outfile
         self.file_num += 1
@@ -458,6 +531,12 @@ class EvMakerApp():
             path = utils.get_file_path_from_dnd_dropped_uri(uri)
             self.load_audio_file(path)
 
+    def drag_data_dst_received(self, widget, context, x, y, selection, targetType, timestamp):
+        uri = selection.data.strip('\r\n\x00')
+        uri_splitted = uri.split()
+        for uri in uri_splitted:
+            path = utils.get_file_path_from_dnd_dropped_uri(uri)
+            self.load_dst_file(path)
 
     def run(self,program, *args):
         pid = os.fork()

@@ -72,7 +72,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="bt_delete">
+              <object class="GtkButton" id="bt_src_del">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -257,29 +257,14 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <object class="GtkButton" id="bt_audio_apply">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <child>
-                          <object class="GtkImage" id="image25">
-                            <property name="visible">True</property>
-                            <property name="icon_name">edit-paste</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="pack_type">end</property>
-                        <property name="position">4</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                     <child>
                       <object class="GtkButton" id="bt_audio_add">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">&#x6DFB;&#x52A0;&#x97F3;&#x9891;</property>
                         <child>
                           <object class="GtkImage" id="image22">
                             <property name="visible">True</property>
@@ -291,11 +276,11 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">3</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="bt_audio_clean">
+                      <object class="GtkButton" id="bt_audio_del">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -311,6 +296,46 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="bt_audio_apply">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">&#x97F3;&#x9891;&#x5E94;&#x7528;&#x65F6;&#x95F4;&#x8F74;</property>
+                        <child>
+                          <object class="GtkImage" id="image25">
+                            <property name="visible">True</property>
+                            <property name="icon_name">emblem-default</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="bt_audio_split">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">&#x5206;&#x5272;&#x89C6;&#x9891;&#x5E76;&#x5408;&#x6210;&#x97F3;&#x9891;</property>
+                        <child>
+                          <object class="GtkImage" id="image24">
+                            <property name="visible">True</property>
+                            <property name="icon_name">edit-cut</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack_type">end</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
@@ -319,11 +344,11 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">&#x5408;&#x6210;&#x97F3;&#x89C6;&#x9891;&#x6E90;</property>
+                        <property name="tooltip_text" translatable="yes">&#x5408;&#x6210;&#x901A;&#x9053;&#x6240;&#x6709;&#x97F3;&#x89C6;&#x9891;&#x6E90;</property>
                         <child>
                           <object class="GtkImage" id="image21">
                             <property name="visible">True</property>
-                            <property name="icon_name">edit-cut</property>
+                            <property name="icon_name">video-x-generic</property>
                           </object>
                         </child>
                       </object>
@@ -762,7 +787,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkVBox" id="vbox_merge">
+          <object class="GtkVBox" id="vbox_dst_merge">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
@@ -868,7 +893,7 @@
                     <child>
                       <object class="GtkImage" id="image13">
                         <property name="visible">True</property>
-                        <property name="icon_name">edit-cut</property>
+                        <property name="icon_name">video-x-generic</property>
                       </object>
                     </child>
                   </object>

@@ -45,7 +45,8 @@ class MarkScale(gtk.HScale):
         return int(a)
 
     def getB(self):
-        b = (self.total*(self.markB+1.00))/100
+        #b = (self.total*(self.markB+1.00))/100
+        b = (self.total*(self.markB))/100
         print 'b = ',b, '   markB = ',self.markB
         return int(b)
 

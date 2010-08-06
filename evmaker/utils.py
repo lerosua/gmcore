@@ -35,3 +35,11 @@ def string_to_time(value):
     """
     astr = value.split(':')
     return int(astr[0])*3600 + int(astr[1])*60 + int(astr[2])
+
+def string_time_sub(a_time,b_time):
+    """
+    return the a_time - b_time. like 00:20:10 - 00:10:19
+    """
+    a = string_to_time(a_time)
+    b = string_to_time(b_time)
+    return time_to_string(a-b)
