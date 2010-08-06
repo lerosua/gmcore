@@ -100,6 +100,7 @@ class EvMakerApp():
         self.timeline.set_draw_value(False)
         vbox_timeline.pack_start(self.timeline,False, False)
         # tool buttons
+        self.builder.get_object("bt_about").connect("clicked", self.on_about_clicked)
         self.builder.get_object("bt_open").connect("clicked", self.on_bt_open_clicked)
         self.builder.get_object("bt_load").connect("clicked", self.on_bt_load_clicked)
         self.builder.get_object("bt_delete").connect("clicked", self.on_bt_delete_clicked)
@@ -213,9 +214,6 @@ class EvMakerApp():
             self.load_audio_file(fn_widget.get_filename())
         fn_widget.destroy()
 
-    def on_bt_cut_clicked(self,widget):
-        print "test"
-    
     def on_bt_delete_clicked(self,widget):
         model = self.iconview_src.get_model()
         selected = self.iconview_src.get_selected_items()
@@ -339,6 +337,20 @@ class EvMakerApp():
             if b < 0:
                 b=0
             self.label_B.set_text(utils.time_to_string(b))
+
+    def on_about_clicked(self, widget):
+        about = gtk.AboutDialog()
+        about.set_name("Easy Video maker")
+        about.set_version("0.01")
+        about.set_copyright("Copyright@lerosua 2010")
+        about.set_comments("A GUI for mencoder")
+        about.set_authors(["lerosua@gmail.com"])
+        about.set_license("GPLv2")
+        about.set_website("http://www.lerosua.org")
+        about.run()
+        about.hide()
+
+
 
     def load_src_file(self, filename):
         jpg = self.player.get_screenshot(filename)
