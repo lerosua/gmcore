@@ -105,6 +105,14 @@ class EvMakerApp():
         vbox_timeline = self.builder.get_object("vbox_timeline")
         self.timeline.set_draw_value(False)
         vbox_timeline.pack_start(self.timeline,False, False)
+
+        self.label_A = self.builder.get_object("label_A_time")
+        self.label_B = self.builder.get_object("label_B_time")
+
+        self.preview_image = self.builder.get_object("image_view")
+        pix = gtk.gdk.pixbuf_new_from_file_at_size(app_jpg,300,200)
+        self.preview_image.set_from_pixbuf(pix)
+
         # tool buttons
         self.builder.get_object("bt_about").connect("clicked", self.on_about_clicked)
         self.builder.get_object("bt_open").connect("clicked", self.on_bt_open_clicked)
@@ -112,15 +120,6 @@ class EvMakerApp():
         self.builder.get_object("bt_src_del").connect("clicked", self.on_bt_src_del_clicked)
         self.builder.get_object("bt_quit").connect("clicked",self.on_bt_quit_clicked)
         self.builder.get_object("bt_src_split").connect("clicked", self.on_bt_split_clicked)
-
-        self.label_A = self.builder.get_object("label_A_time")
-        self.label_B = self.builder.get_object("label_B_time")
-
-
-
-        self.preview_image = self.builder.get_object("image_view")
-        pix = gtk.gdk.pixbuf_new_from_file_at_size(app_jpg,300,200)
-        self.preview_image.set_from_pixbuf(pix)
 
         self.builder.get_object("bt_play").connect("clicked", self.on_bt_play_clicked)
         self.builder.get_object("bt_a").connect("clicked", self.on_bt_a_clicked)
@@ -284,8 +283,9 @@ class EvMakerApp():
         a_time = infos[1].strip(' \'')
         b = infos[2].strip(' \'')
         b_time = utils.string_time_sub(b, a_time)
-        outfile = evhome_dir+"outfile_"+str(self.file_num)+".avi"
-        cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac mp3lame -audiofile " + audio_filename +" "+ video_filename + " -o " + outfile
+        subffix = utils.get_file_subffix(video_filename)
+        outfile = evhome_dir+"outfile_"+str(self.file_num) + subffix
+        cmd = "mencoder" + " -ss " + a_time + " -endpos " + b_time + "  -ovc copy -oac mp3lame -audiofile " + audio_filename + " " + video_filename + " -o " + outfile
         print cmd
         self.file_num += 1
         self.wait_run(cmd)
@@ -310,6 +310,7 @@ class EvMakerApp():
         time_p = "00:00:00"
         cmd = ""
         num = 0
+        subffix = utils.get_file_subffix(video_filename)
         while ( iter != None ):
             row = a_model.get_path(iter)
             audio_filename = a_model[row][COL_PATH]
@@ -323,24 +324,24 @@ class EvMakerApp():
             b_time = utils.string_time_sub(b, a_time)
             #if utils.string_to_time(a_time) == 0:
             if a_time == time_p:
-                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +".avi "
+                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +subffix
                 time_p = b_time
             else:
-                cmd += "mencoder -ss "+ time_p + " -endpos "+ a_time +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +".avi "
+                cmd += "mencoder -ss "+ time_p + " -endpos "+ a_time +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +subffix
                 num +=1
-                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +".avi "
+                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +subffix
                 num +=1
                 time_p = b_time
                 
             iter = a_model.iter_next(iter)
         if time_p != v_end:
-                cmd += "mencoder -ss "+ time_p + " -endpos "+ v_end +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +".avi "
+                cmd += "mencoder -ss "+ time_p + " -endpos "+ v_end +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +subffix
 
         filelist=""
         for i in range(num+1):
-            filelist += "dumpvideo"+str(i)+".avi "
+            filelist += "dumpvideo"+str(i)+subffix
 
-        cmd +="\n mencoder -ovc copy -oac copy -o dumpvideo.avi "+filelist
+        cmd +="\n mencoder -ovc copy -oac copy -o dumpvideo"+subffix+"  "+filelist
 
         print cmd
 
@@ -375,8 +376,13 @@ class EvMakerApp():
         b = self.label_B.get_text()
         b_time = utils.string_time_sub(b,a_time)
         #b_time = utils.time_to_string(self.timeline.getB() - self.timeline.getA())
-        outfile = evhome_dir+"outfile_"+str(self.file_num)+".avi"
-        cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac copy "+filename+" -o "+outfile
+        subffix = utils.get_file_subffix(filename)
+        outfile = evhome_dir + "outfile_" + str(self.file_num) + subffix
+        if subffix == ".rmvb":
+            outfile = evhome_dir + "outfile_" + str(self.file_num) + ".avi"
+            cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc lavc -oac pcm "+filename+" -o "+outfile
+        else:
+            cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc copy -oac copy "+filename+" -o "+outfile
         self.file_num += 1
         print cmd
         print self.file_num
@@ -393,6 +399,7 @@ class EvMakerApp():
             row = model.get_path(iter)
             filename += " "
             filename += model[row][COL_PATH]
+            subffix = utils.get_file_subffix(model[row][COL_PATH])
             info = model[row][COL_INFO]
             infos = info.strip('[]').split(',')
             print infos , infos[1]
@@ -405,7 +412,7 @@ class EvMakerApp():
         if filename == "":
             return 0
         pic_size = str(size_w)+":"+str(size_h)
-        cmd = "mencoder -ovc lavc -oac mp3lame -idx -vf scale=" + pic_size + " " + filename+" -o /tmp/out.avi"
+        cmd = "mencoder -ovc lavc -oac mp3lame -idx -vf scale=" + pic_size + " " + filename+" -o /tmp/output"+subffix
         print cmd
         self.wait_run(cmd)
 

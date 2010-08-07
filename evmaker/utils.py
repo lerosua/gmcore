@@ -43,3 +43,11 @@ def string_time_sub(a_time,b_time):
     a = string_to_time(a_time)
     b = string_to_time(b_time)
     return time_to_string(a-b)
+
+def get_file_subffix(filename):
+    """
+    return /tmp/abc.rmvb  .rmvb
+    """
+    a = filename.split('.')
+    b = "."+a[-1]
+    return b
