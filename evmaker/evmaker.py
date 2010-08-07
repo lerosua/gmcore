@@ -378,7 +378,7 @@ class EvMakerApp():
         #b_time = utils.time_to_string(self.timeline.getB() - self.timeline.getA())
         subffix = utils.get_file_subffix(filename)
         outfile = evhome_dir + "outfile_" + str(self.file_num) + subffix
-        if subffix == ".rmvb":
+        if subffix != ".avi":
             outfile = evhome_dir + "outfile_" + str(self.file_num) + ".avi"
             cmd = "mencoder"+" -ss "+a_time+" -endpos "+b_time+"  -ovc lavc -oac pcm "+filename+" -o "+outfile
         else:
