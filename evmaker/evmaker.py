@@ -117,9 +117,10 @@ class EvMakerApp():
         self.builder.get_object("bt_about").connect("clicked", self.on_about_clicked)
         self.builder.get_object("bt_open").connect("clicked", self.on_bt_open_clicked)
         self.builder.get_object("bt_load").connect("clicked", self.on_bt_load_clicked)
+        self.builder.get_object("bt_src_add").connect("clicked", self.on_bt_load_clicked)
         self.builder.get_object("bt_src_del").connect("clicked", self.on_bt_src_del_clicked)
-        self.builder.get_object("bt_quit").connect("clicked",self.on_bt_quit_clicked)
         self.builder.get_object("bt_src_split").connect("clicked", self.on_bt_split_clicked)
+        self.builder.get_object("bt_quit").connect("clicked",self.on_bt_quit_clicked)
 
         self.builder.get_object("bt_play").connect("clicked", self.on_bt_play_clicked)
         self.builder.get_object("bt_a").connect("clicked", self.on_bt_a_clicked)
@@ -288,7 +289,9 @@ class EvMakerApp():
         cmd = "mencoder" + " -ss " + a_time + " -endpos " + b_time + "  -ovc copy -oac mp3lame -audiofile " + audio_filename + " " + video_filename + " -o " + outfile
         print cmd
         self.file_num += 1
+        self.statusbar.push(0,cmd)
         self.wait_run(cmd)
+        self.statusbar.push(0,"done")
         self.load_dst_file(outfile)
 
 
@@ -311,6 +314,7 @@ class EvMakerApp():
         cmd = ""
         num = 0
         subffix = utils.get_file_subffix(video_filename)
+        cmd_list =[]
         while ( iter != None ):
             row = a_model.get_path(iter)
             audio_filename = a_model[row][COL_PATH]
@@ -322,28 +326,39 @@ class EvMakerApp():
                 iter = a_model.iter_next(iter)
                 continue
             b_time = utils.string_time_sub(b, a_time)
-            #if utils.string_to_time(a_time) == 0:
             if a_time == time_p:
-                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +subffix
+                cmd = "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o /tmp/dumpvideo" + str(num) +subffix
+                cmd_list.append(cmd)
+                num +=1
                 time_p = b_time
             else:
-                cmd += "mencoder -ss "+ time_p + " -endpos "+ a_time +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +subffix
+                cmd = "mencoder -ss "+ time_p + " -endpos "+ a_time +" -ovc copy -oac copy " + video_filename + " -o /tmp/dumpvideo" + str(num) +subffix
+                cmd_list.append(cmd)
                 num +=1
-                cmd += "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o dumpvideo" + str(num) +subffix
+                cmd = "mencoder -ss "+ a_time + " -endpos "+ b_time +" -ovc copy -oac mp3lame -audiofile "+audio_filename + " " + video_filename + " -o /tmp/dumpvideo" + str(num) +subffix
+                cmd_list.append(cmd)
                 num +=1
                 time_p = b_time
                 
             iter = a_model.iter_next(iter)
         if time_p != v_end:
-                cmd += "mencoder -ss "+ time_p + " -endpos "+ v_end +" -ovc copy -oac copy " + video_filename + " -o dumpvideo" + str(num) +subffix
+                cmd = "mencoder -ss "+ time_p + " -endpos "+ v_end +" -ovc copy -oac copy " + video_filename + " -o /tmp/dumpvideo" + str(num) +subffix
+                cmd_list.append(cmd)
+                num += 1
 
         filelist=""
-        for i in range(num+1):
-            filelist += "dumpvideo"+str(i)+subffix
+        for i in range(0,num):
+            filelist += "/tmp/dumpvideo"+str(i)+subffix
+        cmd =" mencoder -ovc copy -oac copy -o /tmp/dumpvideo"+subffix+"  "+filelist
+        cmd_list.append(cmd)
+        num += 1
 
-        cmd +="\n mencoder -ovc copy -oac copy -o dumpvideo"+subffix+"  "+filelist
-
-        print cmd
+        for i in range(0,num):
+            self.statusbar.push(0,cmd)
+            print cmd_list[i]
+            self.wait_run(cmd_list[i])
+        self.statusbar.push(0,"done")
+        self.load_src_file("/tmp/dumpvideo.avi")
 
     def on_bt_src_del_clicked(self,widget):
         model = self.iconview_src.get_model()
@@ -386,7 +401,9 @@ class EvMakerApp():
         self.file_num += 1
         print cmd
         print self.file_num
+        self.statusbar.push(0,cmd)
         self.wait_run(cmd)
+        self.statusbar.push(0,"done")
         self.load_dst_file(outfile)
 
     def on_bt_merge_clicked(self,widget):
@@ -414,7 +431,9 @@ class EvMakerApp():
         pic_size = str(size_w)+":"+str(size_h)
         cmd = "mencoder -ovc lavc -oac mp3lame -idx -vf scale=" + pic_size + " " + filename+" -o /tmp/output"+subffix
         print cmd
+        self.statusbar.push(0,cmd)
         self.wait_run(cmd)
+        self.statusbar.push(0,"done")
 
     def on_bt_play_clicked(self, widget):
         model = self.iconview_src.get_model()

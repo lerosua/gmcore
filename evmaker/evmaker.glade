@@ -51,50 +51,17 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="bt_src_split2">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">none</property>
-                <property name="image_position">right</property>
-                <child>
-                  <object class="GtkImage" id="image4">
-                    <property name="visible">True</property>
-                    <property name="tooltip_text" translatable="yes">&#x526A;&#x8F91;A-B</property>
-                    <property name="icon_name">edit-cut</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">2</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="bt_src_del2">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">none</property>
-                <child>
-                  <object class="GtkImage" id="image10">
-                    <property name="visible">True</property>
-                    <property name="icon_name">edit-delete</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">3</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
               <object class="GtkButton" id="bt_quit">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">&#x9000;&#x51FA;</property>
                 <property name="relief">none</property>
                 <child>
                   <object class="GtkImage" id="image11">
@@ -114,6 +81,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">&#x5173;&#x4E8E;</property>
                 <property name="relief">none</property>
                 <child>
                   <object class="GtkImage" id="image12">
@@ -208,10 +176,14 @@
                       <placeholder/>
                     </child>
                     <child>
+                      <placeholder/>
+                    </child>
+                    <child>
                       <object class="GtkButton" id="bt_src_add">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">&#x52A0;&#x8F7D;&#x89C6;&#x9891;&#x6587;&#x4EF6;</property>
                         <child>
                           <object class="GtkImage" id="image26">
                             <property name="visible">True</property>
@@ -251,6 +223,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">&#x8F6C;&#x6362;&#x89C6;&#x9891;&#x683C;&#x5F0F;</property>
                         <child>
                           <object class="GtkImage" id="image28">
                             <property name="visible">True</property>
@@ -283,25 +256,6 @@
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
                         <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="bt_audio_merge1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <child>
-                          <object class="GtkImage" id="image30">
-                            <property name="visible">True</property>
-                            <property name="icon_name">video-x-generic</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="pack_type">end</property>
-                        <property name="position">0</property>
                       </packing>
                     </child>
                   </object>
@@ -602,28 +556,14 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button1">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <child>
-                              <object class="GtkImage" id="image7">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-skip-backward</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">4</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
                           <object class="GtkButton" id="bt_play">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">&#x9884;&#x89C8;&#x65F6;&#x95F4;&#x8F74;&#x89C6;&#x9891;</property>
                             <child>
                               <object class="GtkImage" id="image1">
                                 <property name="visible">True</property>
@@ -638,112 +578,22 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button8">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <child>
-                              <object class="GtkImage" id="image6">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-skip-forward</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">6</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button7">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <child>
-                              <object class="GtkImage" id="image3">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-seek-forward</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">7</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button6">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <child>
-                              <object class="GtkImage" id="image17">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-seek-backward</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">8</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button9">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <child>
-                              <object class="GtkImage" id="image18">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-seek-backward</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">9</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button10">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <child>
-                              <object class="GtkImage" id="image19">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-seek-backward</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">10</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button11">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <child>
-                              <object class="GtkImage" id="image20">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-seek-backward</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">11</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                       </object>
                       <packing>
@@ -761,6 +611,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">&#x5B9A;&#x4F4D;&#x65F6;&#x95F4;&#x8F74;&#x5230;A</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -794,6 +645,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">&#x5B9A;&#x4F4D;&#x65F6;&#x95F4;&#x8F74;&#x5230;B</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
