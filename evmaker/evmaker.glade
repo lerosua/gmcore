@@ -195,7 +195,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">5</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -215,7 +215,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">4</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -235,7 +235,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">3</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -255,7 +255,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
@@ -349,7 +349,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">5</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -369,7 +369,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">4</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -389,7 +389,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">3</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -409,7 +409,7 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -519,16 +519,11 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="bt_time_sub">
+                            <property name="label" translatable="yes">-</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="tooltip_text" translatable="yes">&#x51CF;&#x5C0F;1&#x79D2;&#x65F6;&#x95F4;</property>
-                            <child>
-                              <object class="GtkImage" id="image16">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-seek-backward</property>
-                              </object>
-                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -538,16 +533,11 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="bt_time_add">
+                            <property name="label" translatable="yes">+</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="tooltip_text" translatable="yes">&#x589E;&#x52A0;1&#x79D2;&#x65F6;&#x95F4;</property>
-                            <child>
-                              <object class="GtkImage" id="image5">
-                                <property name="visible">True</property>
-                                <property name="icon_name">media-seek-forward</property>
-                              </object>
-                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -633,7 +623,7 @@
                         <child>
                           <object class="GtkLabel" id="label8">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">  </property>
+                            <property name="label" translatable="yes">       </property>
                           </object>
                           <packing>
                             <property name="position">2</property>
@@ -832,7 +822,7 @@
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="pack_type">end</property>
-                    <property name="position">3</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>

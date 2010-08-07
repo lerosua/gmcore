@@ -19,7 +19,9 @@ COL_INFO = 4
 
 evhome_dir = "/tmp/"
 video_preview_jpg = "/tmp/00000001.jpg"
-app_jpg = "evmaker.jpg"
+app_png = "evmaker.png"
+audio_png = "audio.png"
+audio_apply_png = "apply.png"
 
 class EvMakerApp():
     def __init__(self):
@@ -31,12 +33,13 @@ class EvMakerApp():
         self.window.set_title("Easy Video Maker")
         self.window.connect("destroy", gtk.main_quit)
 
-        #self.current_dir = "/home/leros/"
         #self.fileIcon = self.get_icon(gtk.STOCK_FILE)
         #self.dirIcon = self.get_icon(gtk.STOCK_OPEN)
         self.player = player()
         self.file_num = 1
         self.time_mark ="A"
+        self.applyIcon =  gtk.gdk.pixbuf_new_from_file_at_size(audio_apply_png,48,48)
+        self.audioIcon =  gtk.gdk.pixbuf_new_from_file_at_size(audio_png,48,48)
 
         self.statusbar = self.builder.get_object("statusbar")
         self.store_src  = self.create_store()
@@ -110,7 +113,7 @@ class EvMakerApp():
         self.label_B = self.builder.get_object("label_B_time")
 
         self.preview_image = self.builder.get_object("image_view")
-        pix = gtk.gdk.pixbuf_new_from_file_at_size(app_jpg,300,200)
+        pix = gtk.gdk.pixbuf_new_from_file_at_size(app_png,300,200)
         self.preview_image.set_from_pixbuf(pix)
 
         # tool buttons
@@ -263,8 +266,8 @@ class EvMakerApp():
         infos = info.strip('[]').split(',')
         length = infos[0].strip('\'')
         model[item][COL_INFO] = [length, a_time, b_time]
-        dirIcon = self.get_icon(gtk.STOCK_OPEN)
-        model[item][COL_PIXBUF] = dirIcon
+        #dirIcon = self.get_icon(gtk.STOCK_OPEN)
+        model[item][COL_PIXBUF] = self.applyIcon
 
     def on_bt_audio_split_clicked(self, widget):
         a_model = self.iconview_audio.get_model()
@@ -348,8 +351,8 @@ class EvMakerApp():
 
         filelist=""
         for i in range(0,num):
-            filelist += "/tmp/dumpvideo"+str(i)+subffix
-        cmd =" mencoder -ovc copy -oac copy -o /tmp/dumpvideo"+subffix+"  "+filelist
+            filelist += " /tmp/dumpvideo"+str(i)+subffix
+        cmd =" mencoder -ovc lavc -oac mp3lame -o /tmp/dumpvideo.avi "+filelist
         cmd_list.append(cmd)
         num += 1
 
@@ -368,7 +371,7 @@ class EvMakerApp():
         item = selected[0][0]
         iter = model.get_iter(item)
         model.remove(iter)
-        #pix = gtk.gdk.pixbuf_new_from_file(app_jpg)
+        #pix = gtk.gdk.pixbuf_new_from_file(app_png)
         #self.preview_image.set_from_pixbuf(pix)
 
 
@@ -502,7 +505,7 @@ class EvMakerApp():
         about.set_version("0.01")
         about.set_copyright("Copyright@lerosua 2010")
         about.set_comments("A GUI for mencoder")
-        about.set_authors(["lerosua@gmail.com"])
+        about.set_authors(["郭嘉","lerosua@gmail.com"])
         about.set_license("GPLv2")
         about.set_website("http://www.lerosua.org")
         about.run()
@@ -531,10 +534,12 @@ class EvMakerApp():
 
     def load_audio_file(self, filename):
         length = self.player.get_length(filename)
-        jpg  = self.get_icon(gtk.STOCK_FILE)
+        #jpg  = self.get_icon(gtk.STOCK_FILE)
+        #jpg =  gtk.gdk.pixbuf_new_from_file_at_size(audio_png,48,48)
         name = os.path.basename(filename)
         # if audio file , the info is length a_time,b_time(a-b is time of video)
-        self.store_audio.append([name,jpg,filename,jpg, [length,"0","0"]])
+        self.store_audio.append([name, self.audioIcon, filename, self.audioIcon, [length,"0","0"]])
+        #self.store_audio.append([name,jpg,filename,jpg, [length,"0","0"]])
 
     def drag_data_src_get(self,widget, context, selection_data, info, timestamp):
         print "drag get"
