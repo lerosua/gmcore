@@ -179,6 +179,9 @@
                       <placeholder/>
                     </child>
                     <child>
+                      <placeholder/>
+                    </child>
+                    <child>
                       <object class="GtkButton" id="bt_src_add">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -216,26 +219,6 @@
                         <property name="fill">False</property>
                         <property name="pack_type">end</property>
                         <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="bt_src_convert">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">&#x8F6C;&#x6362;&#x89C6;&#x9891;&#x683C;&#x5F0F;</property>
-                        <child>
-                          <object class="GtkImage" id="image28">
-                            <property name="visible">True</property>
-                            <property name="icon_name">emblem-default</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="pack_type">end</property>
-                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
