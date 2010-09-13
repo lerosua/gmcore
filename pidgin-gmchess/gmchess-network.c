@@ -76,12 +76,6 @@ static void init_gm_status()
 
 static void gtk_info_msg(const gchar * msg)
 {
-    //gchar* header;
-    //GtkIMHtmlOptions options = GTK_IMHTML_NO_COLOURS;
-    //header = g_strdup_printf(_("<b> %s </b><br><hr>"),msg);
-    //gtk_imhtml_append_text(GTK_IMHTML(_global_status.conv),header,options);
-    //purple_notify_error(NULL,NULL,"info",header);
-    //g_free(header);
     purple_notify_info(NULL, "pidgin-gmchess", _("info"), msg);
 
 }
@@ -205,6 +199,7 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 						joinstr, FALSE);
 				g_signal_emit_by_name(_global_status.conv->entry,
 						"message_send");
+				_global_status.ask = QUES_RUE;
 				g_free(joinstr);
 
 			} else if (strstr(buf, "draw") != NULL) {
@@ -219,6 +214,7 @@ gboolean read_socket(GIOChannel * source, GIOCondition condition,
 						joinstr, FALSE);
 				g_signal_emit_by_name(_global_status.conv->entry,
 						"message_send");
+				_global_status.ask = QUES_DRAW;
 				g_free(joinstr);
 			}
 			g_free(enemy_name);
@@ -264,7 +260,7 @@ static void ok_poune(const char *m)
     _global_status.role = 0;
     _global_status.number = 0;
     //then send reply to parter
-    gchar *joinstr;
+    gchar *joinstr = NULL;
     gchar *enemy_name =
 	g_strdup_printf("%s", _global_status.conv->active_conv->name);
     gchar *my_name = g_strdup_printf("%s",
