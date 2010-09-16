@@ -298,6 +298,7 @@ static void ok_poune(const char *m)
 			    g_signal_emit_by_name(_global_status.conv->entry, "message_send");
 
 			    send_gmchess("network-game-draw");
+			    init_gm_status();
 		    }
 		    break;
 	    case QUES_RUE:
